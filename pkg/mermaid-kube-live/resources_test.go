@@ -15,6 +15,7 @@ func TestGetResourceState(t *testing.T) {
 	}{
 		"configmap": {
 			node: Node{
+				HealthyWhenPresent: true,
 				Selector: NodeSelector{
 					Namespace: "resources",
 					GVR: schema.GroupVersionResource{
@@ -31,7 +32,7 @@ func TestGetResourceState(t *testing.T) {
 			},
 			expected: ResourceState{
 				Count:  1,
-				Status: Pending,
+				Status: Healthy,
 			},
 		},
 	}

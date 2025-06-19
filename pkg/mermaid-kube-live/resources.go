@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/rest"
 )
@@ -38,10 +39,30 @@ func GetResourceState(ctx context.Context, config *rest.Config, node Node) (Reso
 	}
 
 	ret.Status = Pending
+
+	if node.HealthyWhenPresent && len(resources.Items) > 0 {
+		ret.Status = Healthy
+	}
+
 	ret.Count = len(resources.Items)
 
-	// TODO check status of resources and set to healthy if all are
-	// healthy
+	for _, item := range resources.Items {
+		status, found, err := unstructured.NestedSlice(item.Object, "status", "conditions")
+		if err != nil || !found {
+			continue
+		}
 
+		for _, condition := range status {
+			conditionMap, ok := condition.(map[string]interface{})
+			if !ok {
+				continue
+			}
+			if conditionMap["type"] == node.HealthType && conditionMap["status"] != metav1.ConditionTrue {
+				return ret, nil
+			}
+		}
+	}
+
+	ret.Status = Healthy
 	return ret, nil
 }

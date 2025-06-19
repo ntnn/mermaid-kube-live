@@ -39,7 +39,9 @@ func Parse(data []byte) (*Config, error) {
 type Nodes map[string]Node
 
 type Node struct {
-	Selector NodeSelector `json:"selector,omitempty"`
+	Selector           NodeSelector `json:"selector,omitempty"`
+	HealthyWhenPresent bool         `json:"healthyWhenPresent,omitempty"`
+	HealthType         string       `json:"healthType,omitempty"`
 }
 
 type NodeSelector struct {
