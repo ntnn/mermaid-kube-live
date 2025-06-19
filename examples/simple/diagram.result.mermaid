@@ -1,0 +1,14 @@
+graph TD
+  D[Deployment]
+  P[Pod]
+
+  D --> P
+
+  DStatus[Status: Available]
+  style DStatus stroke:#00C853
+  D --o DStatus
+
+  PStatus["`Status: Running
+  Count: 3/3`"]
+  style PStatus stroke:#00C853
+  P --o PStatus

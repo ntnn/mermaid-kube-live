@@ -1,0 +1,22 @@
+---
+nodes:
+  D:
+    selector:
+      namespace: examples-simple
+      gvr:
+        group: apps
+        version: v1
+        resource: deployments
+      labelSelector:
+        matchLabels:
+          app: example-app
+  P:
+    selector:
+      namespace: examples-simple
+      gvr:
+        group: apps
+        version: v1
+        resource: pods
+      labelSelector:
+        matchLabels:
+          app: example-app

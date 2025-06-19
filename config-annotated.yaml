@@ -1,0 +1,33 @@
+---
+nodes:
+  # The node name is the name of the node in the diagram.
+  NodeName:
+    selector:
+      # namespace is the Kubernetes namespace where the resources for the
+      # node are located.
+      namespace: default
+      # The GVR (Group, Version, Resource) to identify the resource type.
+      gvr:
+        group: ""
+        version: v1
+        resource: pods
+      # labelSelector is the same as the labelSelector in Kubernetes with
+      # either matchLabels or matchExpressions.
+      labelSelector:
+        matchLabels:
+          this is a: label with spaces
+          this-is-a: label-with-dashes
+          this_is_a: label_with_underscores
+  NodeWithCluster:
+    selector:
+      # mermaid-kube-live can also reflect the status of resources across
+      # multiple clusters using the fileprovider, which can read one or
+      # multiple kubeconfig files.
+      # The `cluster` name is the context name in the kubeconfig file.
+      #
+      # If the cluster name is not specified, the first cluster is used,
+      # so in single-cluster setups no cluster name is needed.
+      cluster: kind-kind
+      gvr:
+        version: v1
+        resource: configmaps
