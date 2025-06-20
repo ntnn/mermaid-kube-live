@@ -4,20 +4,42 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
+	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime/schema"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 func TestGetResourceState(t *testing.T) {
+	t.Parallel()
+	if testing.Short() {
+		t.Skip("Skipping test in short mode")
+	}
+
+	namespace := namespace(t)
+
 	cases := map[string]struct {
-		node     Node
-		expected ResourceState
+		resources []client.Object
+		node      Node
+		expected  ResourceState
 	}{
 		"configmap": {
+			resources: []client.Object{
+				&corev1.ConfigMap{
+					ObjectMeta: metav1.ObjectMeta{
+						Name:      "configmap",
+						Namespace: namespace,
+						Labels: map[string]string{
+							"testname": "configmap",
+						},
+					},
+					Data: map[string]string{},
+				},
+			},
 			node: Node{
 				HealthyWhenPresent: true,
 				Selector: NodeSelector{
-					Namespace: "resources",
+					Namespace: namespace,
 					GVR: schema.GroupVersionResource{
 						Group:    "",
 						Version:  "v1",
@@ -37,11 +59,19 @@ func TestGetResourceState(t *testing.T) {
 		},
 	}
 
-	cluster, err := provider.Get(t.Context(), "kind-mkl-one")
+	cluster, err := provider.Get(t.Context(), clusterName)
 	require.NoError(t, err)
+
+	client := cluster.GetClient()
 
 	for name, tc := range cases {
 		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+
+			for _, resource := range tc.resources {
+				getOrCreate(t, client, resource)
+			}
+
 			state, err := GetResourceState(t.Context(), cluster.GetConfig(), tc.node)
 			require.NoError(t, err)
 			require.Equal(t, tc.expected, state)
