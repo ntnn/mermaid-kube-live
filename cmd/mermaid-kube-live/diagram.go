@@ -1,11 +1,15 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"fmt"
 	"log"
 	"net/http"
 	"os"
+	"time"
+
+	mkl "github.com/ntnn/mermaid-kube-live/pkg/mermaid-kube-live"
 )
 
 var (
@@ -39,5 +43,60 @@ func loadDiagram() error {
 
 	rawDiagram = string(data)
 	diagram = rawDiagram
+	notifyChan <- struct{}{}
+	return nil
+}
+
+func updateDiagramLoop(ctx context.Context) error {
+	if err := loadDiagram(); err != nil {
+		return fmt.Errorf("failed to load diagram: %w", err)
+	}
+
+	provider, err := getProvider()
+	if err != nil {
+		return fmt.Errorf("failed to get provider: %w", err)
+	}
+
+	config, err := getConfig()
+	if err != nil {
+		return fmt.Errorf("failed to get config: %w", err)
+	}
+
+	updateInterval, err := time.ParseDuration(config.UpdateInterval)
+	if err != nil {
+		return fmt.Errorf("invalid update interval %q: %w", config.UpdateInterval, err)
+	}
+
+	go func() {
+		for range time.Tick(updateInterval) {
+			if ctx.Err() != nil {
+				log.Println("context cancelled, stopping update loop")
+				return
+			}
+
+			log.Printf("updating diagram with nodes\n")
+
+			nodeStates, err := mkl.GetResourceStates(ctx, provider, config.Nodes)
+			if err != nil {
+				log.Printf("failed to get resource states, skipping update: %v", err)
+				continue
+			}
+
+			newDiagram := rawDiagram + "\n"
+			for name, state := range nodeStates {
+				style, ok := config.StatusStyle[state.Status]
+				if !ok {
+					log.Printf("unknown status %s for node %s, skipping", state.Status, name)
+					continue
+				}
+				newDiagram += fmt.Sprintf("style %s %s\n", name, style)
+			}
+
+			log.Println("diagram updated successfully")
+			diagram = newDiagram
+			notifyChan <- struct{}{}
+		}
+	}()
+
 	return nil
 }

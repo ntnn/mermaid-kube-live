@@ -4,14 +4,28 @@ import (
 	"io"
 	"os"
 
-	"gopkg.in/yaml.v2"
+	"sigs.k8s.io/yaml"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 )
 
 type Config struct {
-	Nodes map[string]Node `json:"nodes,omitempty"`
+	UpdateInterval string                    `json:"updateInterval,omitempty"`
+	StatusStyle    map[ResourceStatus]string `json:"statusStyle,omitempty"`
+	Nodes          map[string]Node           `json:"nodes,omitempty"`
+}
+
+func DefaultConfig() Config {
+	return Config{
+		UpdateInterval: "1s",
+		StatusStyle: map[ResourceStatus]string{
+			Absent:  "stroke:#808080",
+			Pending: "stroke:#FFFF00",
+			Healthy: "stroke:#00FF00",
+		},
+		Nodes: make(map[string]Node),
+	}
 }
 
 func ParseFile(filename string) (*Config, error) {
@@ -28,9 +42,8 @@ func ParseFile(filename string) (*Config, error) {
 }
 
 func Parse(data []byte) (*Config, error) {
-	var config Config
-	err := yaml.Unmarshal(data, &config)
-	if err != nil {
+	config := DefaultConfig()
+	if err := yaml.UnmarshalStrict(data, &config); err != nil {
 		return nil, err
 	}
 	return &config, nil
@@ -48,5 +61,5 @@ type NodeSelector struct {
 	Cluster       string                      `json:"cluster,omitempty"`
 	Namespace     string                      `json:"namespace,omitempty"`
 	GVR           schema.GroupVersionResource `json:"gvr,omitempty"`
-	LabelSelector metav1.LabelSelector        `json:"labels,omitempty"`
+	LabelSelector metav1.LabelSelector        `json:"labelSelector,omitempty"`
 }

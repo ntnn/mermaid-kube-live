@@ -1,16 +1,16 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"fmt"
 	"log"
 	"net/http"
-	"time"
 )
 
 func main() {
 	flag.Parse()
-	if err := doMain(); err != nil {
+	if err := doMain(context.Background()); err != nil {
 		log.Fatal(err)
 	}
 }
@@ -20,12 +20,14 @@ var (
 	fPort = flag.Int("port", 8080, "Port to listen on")
 )
 
-func doMain() error {
-	if err := loadDiagram(); err != nil {
-		return fmt.Errorf("failed to load diagram: %w", err)
-	}
+// notifyChan is fed and closed by updateDiagramLoop.
+var notifyChan = make(chan struct{}, 10)
 
-	notifyChan := make(chan struct{})
+func doMain(ctx context.Context) error {
+	log.Printf("start diagram loop")
+	if err := updateDiagramLoop(ctx); err != nil {
+		return fmt.Errorf("failed to start diagram update loop: %w", err)
+	}
 
 	http.HandleFunc("/events", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/event-stream")
@@ -45,13 +47,14 @@ func doMain() error {
 
 	// TODO update diagram and notify clients
 
-	go func() {
-		for range time.Tick(1 * time.Second) {
-			log.Println("Simulating diagram update...")
-			// Simulate a diagram update
-			notifyChan <- struct{}{}
-		}
-	}()
+	// go func() {
+	// 	for range time.Tick(1 * time.Second) {
+	// 		log.Println("Simulating diagram update...")
+	// 		// Simulate a diagram update
+	// 		notifyChan <- struct{}{}
+	// 	}
+	// }()
 
+	log.Printf("listening on %s:%d", *fHost, *fPort)
 	return http.ListenAndServe(fmt.Sprintf("%s:%d", *fHost, *fPort), nil)
 }
