@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>mermaid-kube-live</title>
+        <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+        <script type="module">
+            var config = {
+                startOnLoad: true,
+            };
+            mermaid.initialize(config);
+
+            async function drawDiagram() {
+              fetch('/diagram')
+                  .then(response => response.text())
+                  .then(data => {
+                     const element = document.querySelector('#mermaid');
+                     element.innerHTML = data;
+                     element.removeAttribute('data-processed');
+                     mermaid.run();
+                    });
+            };
+
+            const eventSource = new EventSource('/events');
+            eventSource.onmessage = (e) => {
+                console.log('Received event:', e);
+                drawDiagram();
+            };
+        </script>
+    </head>
+    <body>
+        <div class="mermaid" id="mermaid">
+            graph TD;
+            A[Hello] --> B{World};
+        </div>
+    </body>
+</html>
+
