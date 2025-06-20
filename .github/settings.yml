@@ -1,0 +1,3 @@
+repository:
+  name: mermaid-kube-live
+  description: Style mermaid diagrams based on Kubernetes resources
