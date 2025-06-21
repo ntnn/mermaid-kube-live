@@ -1,4 +1,4 @@
-package mermaidkubelive
+package mkl
 
 import (
 	"context"

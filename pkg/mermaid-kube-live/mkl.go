@@ -1,1 +1,1 @@
-package mermaidkubelive
+package mkl
