@@ -1,11 +1,21 @@
+include .bingo/Variables.mk
+
 go ?= go
 
+.PHONY: tools
+tools:
+	$(go) tool bingo get
+
 .PHONY: check
-check: lint test
+check: imports lint test
+
+.PHONY: imports
+imports:
+	$(GOIMPORTS) -w -l -local github.com/ntnn/mermaid-kube-live .
 
 .PHONY: lint
 lint:
-	$(go) vet ./...
+	$(GOLANGCI_LINT) run ./...
 
 nproc ?= $(shell nproc)
 gotest := $(go) test -v -race -parallel $(nproc)
