@@ -33,7 +33,7 @@ func ParseFile(filename string) (*Config, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer f.Close()
+	defer f.Close() //nolint:errcheck
 	data, err := io.ReadAll(f)
 	if err != nil {
 		return nil, err
