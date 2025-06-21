@@ -5,8 +5,9 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/ntnn/mermaid-kube-live/pkg/fileprovider"
 	"sigs.k8s.io/multicluster-runtime/pkg/multicluster"
+
+	"github.com/ntnn/mermaid-kube-live/pkg/fileprovider"
 )
 
 var (
