@@ -1,7 +1,7 @@
 go ?= go
 
 .PHONY: check
-check: lint test-integration
+check: lint test
 
 .PHONY: lint
 lint:
