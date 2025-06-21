@@ -34,7 +34,7 @@ func doMain(ctx context.Context) error {
 		w.Header().Set("Cache-Control", "no-cache")
 		w.Header().Set("Connection", "keep-alive")
 
-		defer w.(http.CloseNotifier).CloseNotify()
+		defer r.Context().Done()
 		for range notifyChan {
 			fmt.Fprintf(w, "data: diagram updated\n\n")
 			w.(http.Flusher).Flush()
