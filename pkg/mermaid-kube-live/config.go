@@ -11,14 +11,12 @@ import (
 )
 
 type Config struct {
-	UpdateInterval string                    `json:"updateInterval,omitempty"`
 	StatusStyle    map[ResourceStatus]string `json:"statusStyle,omitempty"`
 	Nodes          map[string]Node           `json:"nodes,omitempty"`
 }
 
 func DefaultConfig() Config {
 	return Config{
-		UpdateInterval: "1s",
 		StatusStyle: map[ResourceStatus]string{
 			Absent:  "stroke:#808080",
 			Pending: "stroke:#FFFF00",

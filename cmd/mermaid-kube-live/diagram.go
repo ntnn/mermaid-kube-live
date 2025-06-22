@@ -46,6 +46,8 @@ func loadDiagram() (string, error) {
 	return string(data), nil
 }
 
+var fUpdateInterval = flag.String("update-interval", "1s", "Interval to update the diagram")
+
 func updateDiagramLoop(ctx context.Context) error {
 	provider, err := getProvider()
 	if err != nil {
@@ -57,14 +59,9 @@ func updateDiagramLoop(ctx context.Context) error {
 		}
 	}()
 
-	config, err := getConfig()
+	updateInterval, err := time.ParseDuration(*fUpdateInterval)
 	if err != nil {
-		return fmt.Errorf("failed to get config: %w", err)
-	}
-
-	updateInterval, err := time.ParseDuration(config.UpdateInterval)
-	if err != nil {
-		return fmt.Errorf("invalid update interval %q: %w", config.UpdateInterval, err)
+		return fmt.Errorf("invalid update interval %q: %w", *fUpdateInterval, err)
 	}
 
 	go func() {
@@ -72,6 +69,12 @@ func updateDiagramLoop(ctx context.Context) error {
 			if ctx.Err() != nil {
 				log.Println("context cancelled, stopping update loop")
 				return
+			}
+
+			config, err := getConfig()
+			if err != nil {
+				log.Printf("failed to get config: %v", err)
+				continue
 			}
 
 			log.Printf("updating diagram\n")
