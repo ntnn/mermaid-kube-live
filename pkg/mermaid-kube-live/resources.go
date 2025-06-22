@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/client-go/dynamic"
@@ -46,24 +47,46 @@ func GetResourceStates(ctx context.Context, provider multicluster.Provider, node
 func GetResourceState(ctx context.Context, config *rest.Config, node Node) (ResourceState, error) {
 	ret := ResourceState{Status: Absent, Count: 0}
 
-	labelSelector, err := metav1.LabelSelectorAsSelector(&node.Selector.LabelSelector)
-	if err != nil {
-		return ret, fmt.Errorf("failed to convert label selector: %w", err)
-	}
-
 	client, err := dynamic.NewForConfig(config)
 	if err != nil {
 		return ret, fmt.Errorf("failed to create dynamic client: %w", err)
 	}
 
-	resources, err := client.
-		Resource(node.Selector.GVR).
-		Namespace(node.Selector.Namespace).
-		List(ctx, metav1.ListOptions{
-			LabelSelector: labelSelector.String(),
-		})
-	if err != nil {
-		return ret, fmt.Errorf("failed to get resource: %w", err)
+	var resources *unstructured.UnstructuredList
+
+	if node.Selector.Name != "" {
+		resourceByName, err := client.Resource(node.Selector.GVR).
+			Namespace(node.Selector.Namespace).
+			Get(ctx, node.Selector.Name, metav1.GetOptions{})
+		if apierrors.IsNotFound(err) {
+			return ret, nil // resource not found, return absent state
+		}
+		if err != nil {
+			return ret, fmt.Errorf("failed to get resource by name: %w", err)
+		}
+		resources = &unstructured.UnstructuredList{
+			Items: []unstructured.Unstructured{*resourceByName},
+		}
+	} else {
+		labelSelector, err := metav1.LabelSelectorAsSelector(&node.Selector.LabelSelector)
+		if err != nil {
+			return ret, fmt.Errorf("failed to convert label selector: %w", err)
+		}
+
+		resourceByLabels, err := client.
+			Resource(node.Selector.GVR).
+			Namespace(node.Selector.Namespace).
+			List(ctx, metav1.ListOptions{
+				LabelSelector: labelSelector.String(),
+			})
+		if apierrors.IsNotFound(err) || len(resourceByLabels.Items) == 0 {
+			return ret, nil // no resources found, return absent state
+		}
+		if err != nil {
+			return ret, fmt.Errorf("failed to get resource: %w", err)
+		}
+
+		resources = resourceByLabels
 	}
 
 	ret.Status = Pending

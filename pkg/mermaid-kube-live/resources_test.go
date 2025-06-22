@@ -23,7 +23,7 @@ func TestGetResourceState(t *testing.T) {
 		node      Node
 		expected  ResourceState
 	}{
-		"configmap": {
+		"configmap by labels": {
 			resources: []client.Object{
 				&corev1.ConfigMap{
 					ObjectMeta: metav1.ObjectMeta{
@@ -57,6 +57,33 @@ func TestGetResourceState(t *testing.T) {
 				Status: Healthy,
 			},
 		},
+		"configmap by name": {
+			resources: []client.Object{
+				&corev1.ConfigMap{
+					ObjectMeta: metav1.ObjectMeta{
+						Name:      "configmap-by-name",
+						Namespace: namespace,
+					},
+					Data: map[string]string{},
+				},
+			},
+			node: Node{
+				HealthyWhenPresent: true,
+				Selector: NodeSelector{
+					Namespace: namespace,
+					GVR: schema.GroupVersionResource{
+						Group:    "",
+						Version:  "v1",
+						Resource: "configmaps",
+					},
+					Name: "configmap-by-name",
+				},
+			},
+			expected: ResourceState{
+				Count:  1,
+				Status: Healthy,
+			},
+		},
 	}
 
 	cluster, err := provider.Get(t.Context(), clusterName)
@@ -68,13 +95,17 @@ func TestGetResourceState(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			t.Parallel()
 
+			preCreation, err := GetResourceState(t.Context(), cluster.GetConfig(), tc.node)
+			require.NoError(t, err)
+			require.Equal(t, ResourceState{Status: Absent, Count: 0}, preCreation)
+
 			for _, resource := range tc.resources {
 				getOrCreate(t, client, resource)
 			}
 
-			state, err := GetResourceState(t.Context(), cluster.GetConfig(), tc.node)
+			postCreation, err := GetResourceState(t.Context(), cluster.GetConfig(), tc.node)
 			require.NoError(t, err)
-			require.Equal(t, tc.expected, state)
+			require.Equal(t, tc.expected, postCreation)
 		})
 	}
 }

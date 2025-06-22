@@ -61,5 +61,6 @@ type NodeSelector struct {
 	Cluster       string                      `json:"cluster,omitempty"`
 	Namespace     string                      `json:"namespace,omitempty"`
 	GVR           schema.GroupVersionResource `json:"gvr,omitempty"`
+	Name          string                      `json:"name,omitempty"`
 	LabelSelector metav1.LabelSelector        `json:"labelSelector,omitempty"`
 }
