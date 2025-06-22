@@ -3,6 +3,7 @@ package mkl
 import (
 	"context"
 	"fmt"
+	"log"
 
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -31,7 +32,9 @@ func GetResourceStates(ctx context.Context, provider multicluster.Provider, node
 	for name, node := range nodes {
 		cluster, err := provider.Get(ctx, node.Selector.Cluster)
 		if err != nil {
-			return nil, fmt.Errorf("failed to get cluster %s: %w", node.Selector.Cluster, err)
+			log.Printf("failed to get cluster %s, setting node absent: %v", node.Selector.Cluster, err)
+			ret[name] = ResourceState{Status: Absent, Count: 0}
+			continue
 		}
 
 		state, err := GetResourceState(ctx, cluster.GetConfig(), node)
