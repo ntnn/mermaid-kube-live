@@ -1,0 +1,17 @@
+---
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - '.bingo/*.mod'
+
+permissions:
+  contents: write # Required to push changes to the PR branch
+
+jobs:
+  bingo:
+    uses: ntnn/actions/.github/workflows/bingo.yaml@main
+    with:
+      base-ref: ${{ github.event.pull_request.base.sha }}
+      head-ref: ${{ github.event.pull_request.head.sha }}
