@@ -51,6 +51,11 @@ func updateDiagramLoop(ctx context.Context) error {
 	if err != nil {
 		return fmt.Errorf("failed to get provider: %w", err)
 	}
+	go func() {
+		if err := provider.Run(ctx); err != nil {
+			log.Printf("failed to run provider: %v", err)
+		}
+	}()
 
 	config, err := getConfig()
 	if err != nil {

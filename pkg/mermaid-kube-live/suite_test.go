@@ -71,7 +71,7 @@ func namespaceCluster(t *testing.T, namespace string) {
 	})
 }
 
-func suite() error {
+func suite(ctx context.Context) error {
 	kubeEnv := os.Getenv("KUBECONFIG")
 	if kubeEnv == "" {
 		kubeEnv = filepath.Join(os.Getenv("HOME"), ".kube", "config")
@@ -89,6 +89,9 @@ func suite() error {
 	if err != nil {
 		return fmt.Errorf("failed to initialize provider: %w", err)
 	}
+	if err := provider.RunOnce(ctx); err != nil {
+		return fmt.Errorf("failed to run provider: %w", err)
+	}
 
 	if _, err := provider.Get(context.Background(), clusterName); err != nil {
 		return fmt.Errorf("failed to get cluster %q: %w", clusterName, err)
@@ -100,7 +103,9 @@ func suite() error {
 func TestMain(m *testing.M) {
 	flag.Parse()
 	if !testing.Short() {
-		if err := suite(); err != nil {
+		ctx, cancel := context.WithCancel(context.Background())
+		defer cancel()
+		if err := suite(ctx); err != nil {
 			panic("Suite initialization failed: " + err.Error())
 		}
 	}

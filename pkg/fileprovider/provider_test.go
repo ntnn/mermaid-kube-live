@@ -9,6 +9,7 @@ import (
 func TestFromFiles_Single(t *testing.T) {
 	t.Parallel()
 	provider, err := FromFiles("testdata/single.kubeconfig.yaml")
+	require.NoError(t, provider.RunOnce(t.Context()))
 	require.NoError(t, err)
 	require.NotNil(t, provider)
 	require.Len(t, provider.clusters, 1)
@@ -18,6 +19,7 @@ func TestFromFiles_Single(t *testing.T) {
 func TestFromFiles_Multi(t *testing.T) {
 	t.Parallel()
 	provider, err := FromFiles("testdata/multi.kubeconfig.yaml")
+	require.NoError(t, provider.RunOnce(t.Context()))
 	require.NoError(t, err)
 	require.NotNil(t, provider)
 	require.Len(t, provider.clusters, 3)
@@ -29,6 +31,7 @@ func TestFromFiles_Multi(t *testing.T) {
 func TestFromDirectory(t *testing.T) {
 	t.Parallel()
 	provider, err := FromDirectory("testdata")
+	require.NoError(t, provider.RunOnce(t.Context()))
 	require.NoError(t, err)
 	require.NotNil(t, provider)
 	require.Len(t, provider.clusters, 4)

@@ -3,13 +3,12 @@ package fileprovider
 import (
 	"context"
 	"fmt"
-	"path/filepath"
+	"sync"
+	"time"
 
-	"k8s.io/client-go/rest"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/cluster"
 
-	mcmanager "sigs.k8s.io/multicluster-runtime/pkg/manager"
 	"sigs.k8s.io/multicluster-runtime/pkg/multicluster"
 )
 
@@ -17,62 +16,64 @@ var _ multicluster.Provider = &Provider{}
 
 // Provider implements multicluster.Provider using kubeconfig files.
 type Provider struct {
-	clusters map[string]cluster.Cluster
+	UpdateInterval time.Duration
+
+	directory string
+	filePaths []string
+
+	clustersLock sync.RWMutex
+	clusters     map[string]cluster.Cluster
 }
 
-func FromContexts(kubeCtxs map[string]*rest.Config) (*Provider, error) {
-	provider := &Provider{
-		clusters: make(map[string]cluster.Cluster, len(kubeCtxs)),
+func newProvider() *Provider {
+	return &Provider{
+		UpdateInterval: 1 * time.Second,
+		clusters:       make(map[string]cluster.Cluster),
 	}
+}
 
-	for name, kubeCtx := range kubeCtxs {
-		cl, err := cluster.New(kubeCtx)
-		if err != nil {
-			return nil, fmt.Errorf("failed to create cluster for context %q: %w", name, err)
-		}
-		provider.clusters[name] = cl
-	}
-
-	return provider, nil
+func FromDirectory(dirpath string) (*Provider, error) {
+	p := newProvider()
+	p.directory = dirpath
+	return p, nil
 }
 
 func FromFiles(filepaths ...string) (*Provider, error) {
-	kubeCtxs := map[string]*rest.Config{}
-
-	for _, filepath := range filepaths {
-		fileKubeCtxs, err := ReadContextsFromFile(filepath)
-		if err != nil {
-			return nil, fmt.Errorf("failed to read kubeconfig from file %q: %w", filepath, err)
-		}
-		for name, kubeCtx := range fileKubeCtxs {
-			if _, exists := kubeCtxs[name]; exists {
-				return nil, fmt.Errorf("duplicate context name %q found in file %q", name, filepath)
-			}
-			kubeCtxs[name] = kubeCtx
-		}
-	}
-
-	return FromContexts(kubeCtxs)
+	p := newProvider()
+	p.filePaths = filepaths
+	return p, nil
 }
 
-var KubeconfigGlobs = []string{"*.kubeconfig", "*.kubeconfig.yaml", "*.kubeconfig.yml"}
-
-func FromDirectory(dirpath string) (*Provider, error) {
-	matches := []string{}
-
-	for _, glob := range KubeconfigGlobs {
-		globMatches, err := filepath.Glob(filepath.Join(dirpath, glob))
-		if err != nil {
-			return nil, fmt.Errorf("failed to glob files in directory %q with pattern %q: %w", dirpath, glob, err)
-		}
-		matches = append(matches, globMatches...)
+func (p *Provider) Run(ctx context.Context) error {
+	if err := p.RunOnce(ctx); err != nil {
+		return fmt.Errorf("initial update failed: %w", err)
 	}
-
-	return FromFiles(matches...)
+	for range time.Tick(p.UpdateInterval) {
+		if ctx.Err() != nil {
+			return nil
+		}
+		if err := p.RunOnce(ctx); err != nil {
+			return fmt.Errorf("failed to update clusters: %w", err)
+		}
+	}
+	return nil
 }
 
-func (p *Provider) Run(ctx context.Context, _ mcmanager.Manager) error {
-	<-ctx.Done()
+func (p *Provider) RunOnce(ctx context.Context) error {
+	var c clusters
+	var err error
+	if p.directory != "" {
+		c, err = fromDirectory(p.directory)
+	} else {
+		c, err = fromFiles(p.filePaths...)
+	}
+	if err != nil {
+		return fmt.Errorf("failed to load clusters: %w", err)
+	}
+
+	p.clustersLock.Lock()
+	p.clusters = c
+	p.clustersLock.Unlock()
 	return nil
 }
 
@@ -80,6 +81,9 @@ func (p *Provider) Run(ctx context.Context, _ mcmanager.Manager) error {
 // If the cluster name is empty (""), it returns the first cluster
 // found.
 func (p *Provider) Get(_ context.Context, clusterName string) (cluster.Cluster, error) {
+	p.clustersLock.RLock()
+	defer p.clustersLock.RUnlock()
+
 	if clusterName == "" {
 		for _, cl := range p.clusters {
 			return cl, nil
@@ -94,6 +98,9 @@ func (p *Provider) Get(_ context.Context, clusterName string) (cluster.Cluster, 
 }
 
 func (p *Provider) IndexField(ctx context.Context, obj client.Object, field string, extractValue client.IndexerFunc) error {
+	p.clustersLock.RLock()
+	defer p.clustersLock.RUnlock()
+
 	for name, cl := range p.clusters {
 		if err := cl.GetCache().IndexField(ctx, obj, field, extractValue); err != nil {
 			return fmt.Errorf("failed to index field %q on cluster %q: %w", field, name, err)

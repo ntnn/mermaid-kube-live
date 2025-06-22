@@ -5,8 +5,6 @@ import (
 	"fmt"
 	"strings"
 
-	"sigs.k8s.io/multicluster-runtime/pkg/multicluster"
-
 	"github.com/ntnn/mermaid-kube-live/pkg/fileprovider"
 )
 
@@ -15,7 +13,7 @@ var (
 	fKubeconfigFiles = flag.String("kubeconfig-files", "", "Comma-separated list of kubeconfig files to use for clusters")
 )
 
-func getProvider() (multicluster.Provider, error) {
+func getProvider() (*fileprovider.Provider, error) {
 	if *fKubeconfigDir != "" && *fKubeconfigFiles != "" {
 		return nil, fmt.Errorf("cannot specify both --kubeconfig-dir and --kubeconfig-files")
 	}
