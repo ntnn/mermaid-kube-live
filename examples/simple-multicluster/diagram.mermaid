@@ -1,0 +1,14 @@
+flowchart TD
+  subgraph cluster1
+    cluster1secret[out-first-secret]
+  end
+
+  subgraph cluster2
+    cluster2secret[out-first-secret]
+  end
+  cluster1secret --> cluster2secret
+
+  subgraph cluster3
+    cluster3secret[out-first-secret]
+  end
+  cluster1secret --> cluster3secret
