@@ -10,11 +10,11 @@ tools:
 check: imports lint test
 
 .PHONY: imports
-imports:
+imports: $(GOIMPORTS)
 	$(GOIMPORTS) -w -l -local github.com/ntnn/mermaid-kube-live .
 
 .PHONY: lint
-lint:
+lint: $(GOLANGCI_LINT)
 	$(GOLANGCI_LINT) run ./...
 
 nproc ?= $(shell nproc)
