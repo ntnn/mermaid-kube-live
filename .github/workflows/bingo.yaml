@@ -1,4 +1,5 @@
----
+name: bingo
+
 on:
   pull_request:
     branches:
@@ -12,6 +13,3 @@ permissions:
 jobs:
   bingo:
     uses: ntnn/actions/.github/workflows/bingo.yaml@main
-    with:
-      base-ref: ${{ github.event.pull_request.base.sha }}
-      head-ref: ${{ github.event.pull_request.head.sha }}
