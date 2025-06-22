@@ -43,20 +43,6 @@ func doMain(ctx context.Context) error {
 		}
 	})
 
-	// TODO poll node data from kube clusters
-
-	// TODO add colouring based on node status
-
-	// TODO update diagram and notify clients
-
-	// go func() {
-	// 	for range time.Tick(1 * time.Second) {
-	// 		log.Println("Simulating diagram update...")
-	// 		// Simulate a diagram update
-	// 		notifyChan <- struct{}{}
-	// 	}
-	// }()
-
 	log.Printf("listening on %s:%d", *fHost, *fPort)
 	return http.ListenAndServe(fmt.Sprintf("%s:%d", *fHost, *fPort), nil)
 }
