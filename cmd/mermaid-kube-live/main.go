@@ -38,6 +38,7 @@ func doMain(ctx context.Context) error {
 		for range notifyChan {
 			if _, err := fmt.Fprintf(w, "data: diagram updated\n\n"); err != nil {
 				log.Printf("failed to write to response: %v", err)
+				return
 			}
 			w.(http.Flusher).Flush()
 		}
