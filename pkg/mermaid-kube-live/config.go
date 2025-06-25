@@ -11,8 +11,8 @@ import (
 )
 
 type Config struct {
-	StatusStyle    map[ResourceStatus]string `json:"statusStyle,omitempty"`
-	Nodes          map[string]Node           `json:"nodes,omitempty"`
+	StatusStyle map[ResourceStatus]string `json:"statusStyle,omitempty"`
+	Nodes       map[string]Node           `json:"nodes,omitempty"`
 }
 
 func DefaultConfig() Config {
