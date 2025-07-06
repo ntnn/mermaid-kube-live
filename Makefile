@@ -4,7 +4,7 @@ GOIMPORTS ?= $(GO) tool goimports
 GOLANGCI_LINT ?= $(GO) tool golangci-lint
 
 .PHONY: check
-check: imports lint test
+check: fmt imports lint test
 
 .PHONY: fmt
 fmt:

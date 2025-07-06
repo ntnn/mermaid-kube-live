@@ -7,7 +7,6 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"strings"
 	"sync"
 	"time"
 
@@ -19,19 +18,17 @@ import (
 var mainPage string
 
 type Serve struct {
-	ConfigFile      string `short:"c" long:"config" help:"Path to the configuration file" default:"config.yaml"`
-	DiagramFile     string `short:"d" long:"diagram" help:"Path to the diagram file" required:"true"`
-	KubeconfigFiles string `short:"k" long:"kubeconfig-files" help:"Comma-separated list of kubeconfig files to use for clusters" required:"true"`
+	CommonFlags `embed:""`
 
 	builtDiagram     string
 	builtDiagramLock sync.Mutex
 
 	notifyChan chan struct{}
 
-	Host string `short:"H" long:"host" help:"Host to listen on" default:"localhost"`
-	Port int    `short:"p" long:"port" help:"Port to listen on" default:"8080"`
+	Host string `help:"Host to listen on" default:"localhost"`
+	Port int    `help:"Port to listen on" default:"8080"`
 
-	UpdateInterval time.Duration `short:"i" long:"update-interval" help:"Interval to update the diagram" default:"1s"`
+	UpdateInterval time.Duration `short:"i" help:"Interval to update the diagram" default:"1s"`
 }
 
 func (s *Serve) Run() error {
@@ -82,33 +79,31 @@ func (s *Serve) Run() error {
 		}
 	}()
 
-	// updateInterval, err := time.ParseDuration(*fUpdateInterval)
-	// if err != nil {
-	// 	return fmt.Errorf("invalid update interval %q: %w", *fUpdateInterval, err)
-	// }
-
-	log.Printf("starting kubeconfig provider with files: %s", s.KubeconfigFiles)
-	provider, err := fileprovider.FromFiles(strings.Split(s.KubeconfigFiles, ",")...)
+	log.Printf("starting kubeconfig provider with files: %s", s.kubeconfig())
+	provider, err := fileprovider.FromFiles(s.kubeconfig()...)
 	if err != nil {
-		return fmt.Errorf("failed to get provider: %w", err)
+		return fmt.Errorf("error getting provider: %w", err)
+	}
+	if err := provider.RunOnce(ctx); err != nil {
+		return fmt.Errorf("error running provider once: %w", err)
 	}
 	go func() {
 		if err := provider.Run(ctx); err != nil {
-			log.Printf("failed to run provider: %v", err)
+			log.Printf("provider errored: %v", err)
 		}
 	}()
 
 	for range time.Tick(s.UpdateInterval) {
-		rawDiagram, err := os.ReadFile(s.DiagramFile)
+		rawDiagram, err := os.ReadFile(s.Diagram)
 		if err != nil {
-			log.Printf("failed to read diagram file %s: %v", s.DiagramFile, err)
+			log.Printf("failed to read diagram file %s: %v", s.Diagram, err)
 			continue
 		}
 		diagram := string(rawDiagram) + "\n"
 
-		config, err := mkl.ParseFile(s.ConfigFile)
+		config, err := mkl.ParseFile(s.Config)
 		if err != nil {
-			log.Printf("failed to read config file %s: %v", s.ConfigFile, err)
+			log.Printf("failed to read config file %s: %v", s.Config, err)
 			continue
 		}
 
