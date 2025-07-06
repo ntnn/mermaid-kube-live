@@ -9,6 +9,10 @@ tools:
 .PHONY: check
 check: imports lint test
 
+.PHONY: fmt
+fmt:
+	$(go) fmt ./...
+
 .PHONY: imports
 imports: $(GOIMPORTS)
 	$(GOIMPORTS) -w -l -local github.com/ntnn/mermaid-kube-live .
