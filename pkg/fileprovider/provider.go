@@ -3,6 +3,8 @@ package fileprovider
 import (
 	"context"
 	"fmt"
+	"maps"
+	"slices"
 	"sync"
 	"time"
 
@@ -107,4 +109,11 @@ func (p *Provider) IndexField(ctx context.Context, obj client.Object, field stri
 		}
 	}
 	return nil
+}
+
+// ClusterNames returns the names of all clusters known to the provider.
+func (p *Provider) ClusterNames() []string {
+	p.clustersLock.RLock()
+	defer p.clustersLock.RUnlock()
+	return slices.Sorted(maps.Keys(p.clusters))
 }

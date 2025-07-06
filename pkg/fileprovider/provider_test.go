@@ -40,3 +40,13 @@ func TestFromDirectory(t *testing.T) {
 	require.Contains(t, provider.clusters, "two")
 	require.Contains(t, provider.clusters, "three")
 }
+
+func TestProvider_ClusterNames(t *testing.T) {
+	t.Parallel()
+	provider, err := FromFiles("testdata/multi.kubeconfig.yaml")
+	require.NoError(t, provider.RunOnce(t.Context()))
+	require.NoError(t, err)
+	require.NotNil(t, provider)
+	require.Len(t, provider.clusters, 3)
+	require.Equal(t, []string{"one", "three", "two"}, provider.ClusterNames())
+}
