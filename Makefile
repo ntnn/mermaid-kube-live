@@ -1,31 +1,31 @@
-go ?= go
+GO ?= go
 
-goimports := $(go) tool goimports
-golangci_lint := $(go) tool golangci-lint
+GOIMPORTS ?= $(GO) tool goimports
+GOLANGCI_LINT ?= $(GO) tool golangci-lint
 
 .PHONY: check
 check: imports lint test
 
 .PHONY: fmt
 fmt:
-	$(go) fmt ./...
+	$(GO) fmt ./...
 
 .PHONY: imports
 imports:
-	$(goimports) -w -l -local github.com/ntnn/mermaid-kube-live .
+	$(GOIMPORTS) -w -l -local github.com/ntnn/mermaid-kube-live .
 
 .PHONY: lint
 lint:
-	$(golangci_lint) run ./...
+	$(GOLANGCI_LINT) run ./...
 
-nproc ?= $(shell nproc)
-gotest := $(go) test -v -race -parallel $(nproc)
-gotarget := ./...
+NPROC ?= $(shell nproc)
+GOTEST := $(GO) test -v -race -parallel $(NPROC)
+WHAT := ./...
 
 .PHONY: test
 test:
-	$(gotest) -short $(gotarget)
+	$(GOTEST) -short $(WHAT)
 
 .PHONY: test-integration
 test-integration:
-	$(gotest) $(gotarget)
+	$(GOTEST) $(WHAT)
