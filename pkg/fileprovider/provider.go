@@ -2,6 +2,7 @@ package fileprovider
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"maps"
 	"slices"
@@ -23,14 +24,20 @@ type Provider struct {
 	directory string
 	filePaths []string
 
-	clustersLock sync.RWMutex
-	clusters     map[string]cluster.Cluster
+	clustersLock  sync.RWMutex
+	clusters      map[string]cluster.Cluster
+	clusterCancel map[string]func()
+	// Using a map of errors instead of a channel to be able to collect
+	// the errors in RunOnce without blocking.
+	clusterErrs map[string]error
 }
 
 func newProvider() *Provider {
 	return &Provider{
 		UpdateInterval: 1 * time.Second,
 		clusters:       make(map[string]cluster.Cluster),
+		clusterCancel:  make(map[string]func()),
+		clusterErrs:    make(map[string]error),
 	}
 }
 
@@ -47,21 +54,28 @@ func FromFiles(filepaths ...string) (*Provider, error) {
 }
 
 func (p *Provider) Run(ctx context.Context) error {
-	if err := p.RunOnce(ctx); err != nil {
+	if err := p.run(ctx); err != nil {
 		return fmt.Errorf("initial update failed: %w", err)
 	}
 	for range time.Tick(p.UpdateInterval) {
 		if ctx.Err() != nil {
-			return nil
+			break
 		}
-		if err := p.RunOnce(ctx); err != nil {
+		if err := p.run(ctx); err != nil {
 			return fmt.Errorf("failed to update clusters: %w", err)
 		}
 	}
-	return nil
+	return p.collectErrors()
 }
 
 func (p *Provider) RunOnce(ctx context.Context) error {
+	if err := p.run(ctx); err != nil {
+		return err
+	}
+	return p.collectErrors()
+}
+
+func (p *Provider) run(ctx context.Context) error {
 	var c clusters
 	var err error
 	if p.directory != "" {
@@ -74,9 +88,60 @@ func (p *Provider) RunOnce(ctx context.Context) error {
 	}
 
 	p.clustersLock.Lock()
-	p.clusters = c
-	p.clustersLock.Unlock()
+	defer p.clustersLock.Unlock()
+	// add new clusters
+	for name, cl := range c {
+		if _, ok := p.clusters[name]; ok {
+			continue
+		}
+		ctx, cancel := context.WithCancel(ctx)
+		p.clusters[name] = cl
+		p.clusterCancel[name] = cancel
+		go func() {
+			if err := cl.Start(ctx); err != nil {
+				if ctx.Err() == nil || ctx.Err() == context.Canceled {
+					return
+				}
+
+				// If .Start returns an error remove the cluster from
+				// the provider and store teh error in the clusterErrs
+				// map. The provider will pick the error up.
+				p.clustersLock.Lock()
+				delete(p.clusters, name)
+				delete(p.clusterCancel, name)
+				p.clusterErrs[name] = errors.Join(p.clusterErrs[name], err)
+				p.clustersLock.Unlock()
+			}
+		}()
+	}
+
+	// delete clusters that are no longer present
+	for name := range p.clusters {
+		if _, ok := c[name]; ok {
+			continue
+		}
+		cancel := p.clusterCancel[name]
+		cancel()
+		delete(p.clusters, name)
+		delete(p.clusterCancel, name)
+		// keep clusterErrs
+	}
 	return nil
+}
+
+func (p *Provider) collectErrors() error {
+	p.clustersLock.Lock()
+	defer p.clustersLock.Unlock()
+
+	var err error
+	for name, clusterErr := range p.clusterErrs {
+		if clusterErr == nil {
+			continue
+		}
+		err = errors.Join(err, fmt.Errorf("cluster %q client errored: %w", name, clusterErr))
+		delete(p.clusterErrs, name)
+	}
+	return err
 }
 
 // Get returns the cluster with the given name.
