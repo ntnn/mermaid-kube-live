@@ -79,14 +79,17 @@ func (s *Serve) Run() error {
 		}
 	}()
 
-	log.Printf("starting kubeconfig provider with files: %s", s.CommonFlags.Kubeconfig)
-	provider, err := fileprovider.FromFiles(s.CommonFlags.Kubeconfig...)
+	log.Printf("starting kubeconfig provider with files: %s", s.kubeconfig())
+	provider, err := fileprovider.FromFiles(s.kubeconfig()...)
 	if err != nil {
-		return fmt.Errorf("failed to get provider: %w", err)
+		return fmt.Errorf("error getting provider: %w", err)
+	}
+	if err := provider.RunOnce(ctx); err != nil {
+		return fmt.Errorf("error running provider once: %w", err)
 	}
 	go func() {
 		if err := provider.Run(ctx); err != nil {
-			log.Printf("failed to run provider: %v", err)
+			log.Printf("provider errored: %v", err)
 		}
 	}()
 
