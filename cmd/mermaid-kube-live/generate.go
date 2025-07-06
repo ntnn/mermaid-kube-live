@@ -6,9 +6,10 @@ import (
 	"log"
 	"os"
 
+	yaml "sigs.k8s.io/yaml/goyaml.v2"
+
 	"github.com/ntnn/mermaid-kube-live/pkg/fileprovider"
 	mkl "github.com/ntnn/mermaid-kube-live/pkg/mermaid-kube-live"
-	yaml "sigs.k8s.io/yaml/goyaml.v2"
 )
 
 type Generate struct {
