@@ -14,7 +14,7 @@ import (
 	"k8s.io/client-go/rest"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
-	"github.com/ntnn/mermaid-kube-live/pkg/fileprovider"
+	"sigs.k8s.io/multicluster-runtime/providers/file"
 )
 
 type GenerateConfig struct {
@@ -167,7 +167,7 @@ func skipResource(resource unstructured.Unstructured) bool {
 	return false
 }
 
-func Generate(ctx context.Context, provider *fileprovider.Provider, cfg *GenerateConfig) (Config, string, error) {
+func Generate(ctx context.Context, provider *file.Provider, cfg *GenerateConfig) (Config, string, error) {
 	retCfg := DefaultConfig()
 	retDiagram := strings.Builder{}
 	retDiagram.WriteString("flowgraph TD\n")
