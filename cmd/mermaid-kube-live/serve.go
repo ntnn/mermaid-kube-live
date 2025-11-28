@@ -10,8 +10,9 @@ import (
 	"sync"
 	"time"
 
-	mkl "github.com/ntnn/mermaid-kube-live/pkg/mermaid-kube-live"
 	"sigs.k8s.io/multicluster-runtime/providers/file"
+
+	mkl "github.com/ntnn/mermaid-kube-live/pkg/mermaid-kube-live"
 )
 
 //go:embed serve.html
@@ -91,7 +92,7 @@ func (s *Serve) Run() error {
 		return fmt.Errorf("error running provider once: %w", err)
 	}
 	go func() {
-		if err := provider.Run(ctx, nil); err != nil {
+		if err := provider.Start(ctx, nil); err != nil {
 			log.Printf("provider errored: %v", err)
 		}
 	}()

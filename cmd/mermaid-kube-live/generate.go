@@ -8,8 +8,9 @@ import (
 
 	yaml "sigs.k8s.io/yaml/goyaml.v2"
 
-	mkl "github.com/ntnn/mermaid-kube-live/pkg/mermaid-kube-live"
 	"sigs.k8s.io/multicluster-runtime/providers/file"
+
+	mkl "github.com/ntnn/mermaid-kube-live/pkg/mermaid-kube-live"
 )
 
 type Generate struct {
