@@ -3,6 +3,13 @@ GO ?= go
 GOIMPORTS ?= $(GO) tool goimports
 GOLANGCI_LINT ?= $(GO) tool golangci-lint
 
+bin:
+	mkdir -p bin
+
+.PHONY: build
+build: bin
+	$(GO) build -o bin/mermaid-kube-live ./cmd/mermaid-kube-live
+
 .PHONY: check
 check: fmt imports lint test
 
