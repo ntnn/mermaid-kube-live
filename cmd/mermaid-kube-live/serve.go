@@ -10,7 +10,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/ntnn/mermaid-kube-live/pkg/fileprovider"
+	"sigs.k8s.io/multicluster-runtime/providers/file"
+
 	mkl "github.com/ntnn/mermaid-kube-live/pkg/mermaid-kube-live"
 )
 
@@ -80,15 +81,18 @@ func (s *Serve) Run() error {
 	}()
 
 	log.Printf("starting kubeconfig provider with files: %s", s.kubeconfig())
-	provider, err := fileprovider.FromFiles(s.kubeconfig()...)
+
+	provider, err := file.New(file.Options{
+		KubeconfigFiles: s.kubeconfig(),
+	})
 	if err != nil {
 		return fmt.Errorf("error getting provider: %w", err)
 	}
-	if err := provider.RunOnce(ctx); err != nil {
+	if err := provider.RunOnce(ctx, nil); err != nil {
 		return fmt.Errorf("error running provider once: %w", err)
 	}
 	go func() {
-		if err := provider.Run(ctx); err != nil {
+		if err := provider.Start(ctx, nil); err != nil {
 			log.Printf("provider errored: %v", err)
 		}
 	}()

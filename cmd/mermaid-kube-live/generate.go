@@ -8,7 +8,8 @@ import (
 
 	yaml "sigs.k8s.io/yaml/goyaml.v2"
 
-	"github.com/ntnn/mermaid-kube-live/pkg/fileprovider"
+	"sigs.k8s.io/multicluster-runtime/providers/file"
+
 	mkl "github.com/ntnn/mermaid-kube-live/pkg/mermaid-kube-live"
 )
 
@@ -22,11 +23,13 @@ func (g *Generate) Run() error {
 	defer cancel()
 
 	log.Printf("starting kubeconfig provider with files: %s", g.kubeconfig())
-	provider, err := fileprovider.FromFiles(g.kubeconfig()...)
+	provider, err := file.New(file.Options{
+		KubeconfigFiles: g.kubeconfig(),
+	})
 	if err != nil {
 		return fmt.Errorf("error getting provider: %w", err)
 	}
-	if err := provider.RunOnce(ctx); err != nil {
+	if err := provider.RunOnce(ctx, nil); err != nil {
 		return fmt.Errorf("error running provider once: %w", err)
 	}
 

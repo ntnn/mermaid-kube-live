@@ -15,11 +15,11 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
-	"github.com/ntnn/mermaid-kube-live/pkg/fileprovider"
+	"sigs.k8s.io/multicluster-runtime/providers/file"
 )
 
 var (
-	provider    *fileprovider.Provider
+	provider    *file.Provider
 	clusterName string
 )
 
@@ -85,11 +85,13 @@ func suite(ctx context.Context) error {
 	fmt.Fprintf(os.Stderr, "The tests will create resources in the cluster, and clean them up afterwards.\n")
 
 	var err error
-	provider, err = fileprovider.FromFiles(kubeEnv)
+	provider, err = file.New(file.Options{
+		KubeconfigFiles: []string{kubeEnv},
+	})
 	if err != nil {
 		return fmt.Errorf("failed to initialize provider: %w", err)
 	}
-	if err := provider.RunOnce(ctx); err != nil {
+	if err := provider.RunOnce(ctx, nil); err != nil {
 		return fmt.Errorf("failed to run provider: %w", err)
 	}
 
