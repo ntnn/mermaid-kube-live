@@ -82,7 +82,7 @@ func GetResourceState(ctx context.Context, config *rest.Config, node Node) (Reso
 			List(ctx, metav1.ListOptions{
 				LabelSelector: labelSelector.String(),
 			})
-		if apierrors.IsNotFound(err) || len(resourceByLabels.Items) == 0 {
+		if apierrors.IsNotFound(err) || resourceByLabels == nil || len(resourceByLabels.Items) == 0 {
 			return ret, nil // no resources found, return absent state
 		}
 		if err != nil {
