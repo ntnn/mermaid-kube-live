@@ -57,7 +57,8 @@ func GetResourceState(ctx context.Context, config *rest.Config, node Node) (Reso
 
 	var resources *unstructured.UnstructuredList
 
-	if node.Selector.Name != "" {
+	switch {
+	case node.Selector.Name != "":
 		resourceByName, err := client.Resource(node.Selector.GVR).
 			Namespace(node.Selector.Namespace).
 			Get(ctx, node.Selector.Name, metav1.GetOptions{})
@@ -70,7 +71,46 @@ func GetResourceState(ctx context.Context, config *rest.Config, node Node) (Reso
 		resources = &unstructured.UnstructuredList{
 			Items: []unstructured.Unstructured{*resourceByName},
 		}
-	} else {
+	case node.Selector.Owner.Name != "":
+		ownerByName, err := client.Resource(node.Selector.Owner.GVR).
+			Namespace(node.Selector.Namespace).
+			Get(ctx, node.Selector.Owner.Name, metav1.GetOptions{})
+		if apierrors.IsNotFound(err) {
+			return ret, nil // owner resource not found, return absent state
+		}
+		if err != nil {
+			return ret, fmt.Errorf("failed to get owner resource: %w", err)
+		}
+
+		ownerUID := ownerByName.GetUID()
+		resourceByOwner, err := client.
+			Resource(node.Selector.GVR).
+			Namespace(node.Selector.Namespace).
+			List(ctx, metav1.ListOptions{})
+		if apierrors.IsNotFound(err) || resourceByOwner == nil || len(resourceByOwner.Items) == 0 {
+			return ret, nil // no resources found, return absent state
+		}
+		if err != nil {
+			return ret, fmt.Errorf("failed to get resource by owner: %w", err)
+		}
+
+		var ownedResources []unstructured.Unstructured
+		for _, item := range resourceByOwner.Items {
+			owners := item.GetOwnerReferences()
+			for _, owner := range owners {
+				if owner.UID == ownerUID {
+					ownedResources = append(ownedResources, item)
+					break
+				}
+			}
+		}
+		if len(ownedResources) == 0 {
+			return ret, nil // no owned resources found, return absent state
+		}
+		resources = &unstructured.UnstructuredList{
+			Items: ownedResources,
+		}
+	default:
 		labelSelector, err := metav1.LabelSelectorAsSelector(&node.Selector.LabelSelector)
 		if err != nil {
 			return ret, fmt.Errorf("failed to convert label selector: %w", err)

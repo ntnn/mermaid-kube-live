@@ -61,4 +61,10 @@ type NodeSelector struct {
 	GVR           schema.GroupVersionResource `json:"gvr,omitempty"`
 	Name          string                      `json:"name,omitempty"`
 	LabelSelector metav1.LabelSelector        `json:"labelSelector,omitempty"`
+	Owner         OwnerReference              `json:"owner,omitempty"`
+}
+
+type OwnerReference struct {
+	GVR  schema.GroupVersionResource `json:"gvr,omitempty"`
+	Name string                      `json:"name,omitempty"`
 }
