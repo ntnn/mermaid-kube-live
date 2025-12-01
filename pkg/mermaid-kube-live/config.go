@@ -53,6 +53,10 @@ type Node struct {
 	Selector           NodeSelector `json:"selector,omitempty"`
 	HealthyWhenPresent bool         `json:"healthyWhenPresent,omitempty"`
 	HealthType         string       `json:"healthType,omitempty"`
+	// Label is an optional label to display for the node.
+	// This can be a CEL expression.
+	// The input is the ResourceState object for the node, named `rs`.
+	Label string `json:"label,omitempty"`
 }
 
 type NodeSelector struct {

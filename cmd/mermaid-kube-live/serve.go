@@ -124,6 +124,14 @@ func (s *Serve) Run() error {
 				continue
 			}
 			diagram += fmt.Sprintf("style %s %s\n", name, style)
+			if configLabel := config.Nodes[name].Label; configLabel != "" {
+				label, err := expandLabel(ctx, configLabel, state)
+				if err != nil {
+					log.Printf("failed to expand label for node %s, skipping label update: %v", name, err)
+					continue
+				}
+				diagram += fmt.Sprintf("%s[%s]\n", name, label)
+			}
 		}
 
 		if s.builtDiagram == diagram {

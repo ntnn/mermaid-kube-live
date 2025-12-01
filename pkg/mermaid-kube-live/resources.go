@@ -22,8 +22,9 @@ const (
 )
 
 type ResourceState struct {
-	Status ResourceStatus `json:"status"`
-	Count  int            `json:"count"`
+	Resources []map[string]any `json:"resources,omitempty"`
+	Status    ResourceStatus   `json:"status"`
+	Count     int              `json:"count"`
 }
 
 func GetResourceStates(ctx context.Context, provider multicluster.Provider, nodes map[string]Node) (map[string]ResourceState, error) {
@@ -48,14 +49,17 @@ func GetResourceStates(ctx context.Context, provider multicluster.Provider, node
 }
 
 func GetResourceState(ctx context.Context, config *rest.Config, node Node) (ResourceState, error) {
-	ret := ResourceState{Status: Absent, Count: 0}
+	ret := ResourceState{
+		Status: Absent,
+		Count:  0,
+	}
 
 	client, err := dynamic.NewForConfig(config)
 	if err != nil {
 		return ret, fmt.Errorf("failed to create dynamic client: %w", err)
 	}
 
-	var resources *unstructured.UnstructuredList
+	var resources []unstructured.Unstructured
 
 	switch {
 	case node.Selector.Name != "":
@@ -68,9 +72,7 @@ func GetResourceState(ctx context.Context, config *rest.Config, node Node) (Reso
 		if err != nil {
 			return ret, fmt.Errorf("failed to get resource by name: %w", err)
 		}
-		resources = &unstructured.UnstructuredList{
-			Items: []unstructured.Unstructured{*resourceByName},
-		}
+		resources = []unstructured.Unstructured{*resourceByName}
 	case node.Selector.Owner.Name != "":
 		ownerByName, err := client.Resource(node.Selector.Owner.GVR).
 			Namespace(node.Selector.Namespace).
@@ -107,9 +109,7 @@ func GetResourceState(ctx context.Context, config *rest.Config, node Node) (Reso
 		if len(ownedResources) == 0 {
 			return ret, nil // no owned resources found, return absent state
 		}
-		resources = &unstructured.UnstructuredList{
-			Items: ownedResources,
-		}
+		resources = ownedResources
 	default:
 		labelSelector, err := metav1.LabelSelectorAsSelector(&node.Selector.LabelSelector)
 		if err != nil {
@@ -129,18 +129,21 @@ func GetResourceState(ctx context.Context, config *rest.Config, node Node) (Reso
 			return ret, fmt.Errorf("failed to get resource: %w", err)
 		}
 
-		resources = resourceByLabels
+		resources = resourceByLabels.Items
 	}
 
 	ret.Status = Pending
-
-	if node.HealthyWhenPresent && len(resources.Items) > 0 {
+	if node.HealthyWhenPresent && len(ret.Resources) > 0 {
 		ret.Status = Healthy
 	}
 
-	ret.Count = len(resources.Items)
-	if allOk(resources.Items, node.HealthType) {
+	ret.Count = len(ret.Resources)
+	if allOk(resources, node.HealthType) {
 		ret.Status = Healthy
+	}
+
+	for _, res := range resources {
+		ret.Resources = append(ret.Resources, res.Object)
 	}
 
 	return ret, nil
