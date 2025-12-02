@@ -5,6 +5,9 @@ GOLANGCI_LINT ?= $(GO) tool golangci-lint
 DEEPCOPY_GEN := $(GO) tool deepcopy-gen
 VALIDATION_GEN := $(GO) tool validation-gen
 
+.PHONY: check
+check: codegen fmt imports lint test
+
 bin:
 	mkdir -p bin
 
