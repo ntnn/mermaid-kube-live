@@ -8,6 +8,8 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+
+	mklv1alpha1 "github.com/ntnn/mermaid-kube-live/apis/v1alpha1"
 )
 
 func TestGetResourceState(t *testing.T) {
@@ -20,7 +22,7 @@ func TestGetResourceState(t *testing.T) {
 
 	cases := map[string]struct {
 		resources []client.Object
-		node      Node
+		node      mklv1alpha1.Node
 		expected  ResourceState
 	}{
 		"configmap by labels": {
@@ -36,9 +38,8 @@ func TestGetResourceState(t *testing.T) {
 					Data: map[string]string{},
 				},
 			},
-			node: Node{
-				HealthyWhenPresent: true,
-				Selector: NodeSelector{
+			node: mklv1alpha1.Node{
+				Selector: mklv1alpha1.NodeSelector{
 					Namespace: namespace,
 					GVR: schema.GroupVersionResource{
 						Group:    "",
@@ -54,7 +55,7 @@ func TestGetResourceState(t *testing.T) {
 			},
 			expected: ResourceState{
 				Count:  1,
-				Status: Healthy,
+				Status: mklv1alpha1.ResourceHealthy,
 			},
 		},
 		"configmap by name": {
@@ -67,9 +68,8 @@ func TestGetResourceState(t *testing.T) {
 					Data: map[string]string{},
 				},
 			},
-			node: Node{
-				HealthyWhenPresent: true,
-				Selector: NodeSelector{
+			node: mklv1alpha1.Node{
+				Selector: mklv1alpha1.NodeSelector{
 					Namespace: namespace,
 					GVR: schema.GroupVersionResource{
 						Group:    "",
@@ -81,7 +81,7 @@ func TestGetResourceState(t *testing.T) {
 			},
 			expected: ResourceState{
 				Count:  1,
-				Status: Healthy,
+				Status: mklv1alpha1.ResourceHealthy,
 			},
 		},
 	}
@@ -97,7 +97,7 @@ func TestGetResourceState(t *testing.T) {
 
 			preCreation, err := GetResourceState(t.Context(), cluster.GetConfig(), tc.node)
 			require.NoError(t, err)
-			require.Equal(t, ResourceState{Status: Absent, Count: 0}, preCreation)
+			require.Equal(t, ResourceState{Status: mklv1alpha1.ResourceAbsent, Count: 0}, preCreation)
 
 			for _, resource := range tc.resources {
 				getOrCreate(t, client, resource)

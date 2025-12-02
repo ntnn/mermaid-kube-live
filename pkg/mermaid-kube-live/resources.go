@@ -11,30 +11,24 @@ import (
 	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/rest"
 	"sigs.k8s.io/multicluster-runtime/pkg/multicluster"
-)
 
-type ResourceStatus string
-
-const (
-	Absent  ResourceStatus = "absent"
-	Pending ResourceStatus = "pending"
-	Healthy ResourceStatus = "healthy"
+	mklv1alpha1 "github.com/ntnn/mermaid-kube-live/apis/v1alpha1"
 )
 
 type ResourceState struct {
-	Resources []map[string]any `json:"resources,omitempty"`
-	Status    ResourceStatus   `json:"status"`
-	Count     int              `json:"count"`
+	Resources []map[string]any           `json:"resources,omitempty"`
+	Status    mklv1alpha1.ResourceStatus `json:"status"`
+	Count     int                        `json:"count"`
 }
 
-func GetResourceStates(ctx context.Context, provider multicluster.Provider, nodes map[string]Node) (map[string]ResourceState, error) {
+func GetResourceStates(ctx context.Context, provider multicluster.Provider, nodes map[string]mklv1alpha1.Node) (map[string]ResourceState, error) {
 	ret := make(map[string]ResourceState, len(nodes))
 
 	for name, node := range nodes {
-		cluster, err := provider.Get(ctx, node.Selector.Cluster)
+		cluster, err := provider.Get(ctx, node.Selector.ClusterName)
 		if err != nil {
-			log.Printf("failed to get cluster %s, setting node absent: %v", node.Selector.Cluster, err)
-			ret[name] = ResourceState{Status: Absent, Count: 0}
+			log.Printf("failed to get cluster %s, setting node absent: %v", node.Selector.ClusterName, err)
+			ret[name] = ResourceState{Status: mklv1alpha1.ResourceAbsent, Count: 0}
 			continue
 		}
 
@@ -48,9 +42,9 @@ func GetResourceStates(ctx context.Context, provider multicluster.Provider, node
 	return ret, nil
 }
 
-func GetResourceState(ctx context.Context, config *rest.Config, node Node) (ResourceState, error) {
+func GetResourceState(ctx context.Context, config *rest.Config, node mklv1alpha1.Node) (ResourceState, error) {
 	ret := ResourceState{
-		Status: Absent,
+		Status: mklv1alpha1.ResourceAbsent,
 		Count:  0,
 	}
 
@@ -132,14 +126,14 @@ func GetResourceState(ctx context.Context, config *rest.Config, node Node) (Reso
 		resources = resourceByLabels.Items
 	}
 
-	ret.Status = Pending
-	if node.HealthyWhenPresent && len(ret.Resources) > 0 {
-		ret.Status = Healthy
+	ret.Status = mklv1alpha1.ResourcePending
+	if node.Health.WhenPresent && len(ret.Resources) > 0 {
+		ret.Status = mklv1alpha1.ResourceHealthy
 	}
 
 	ret.Count = len(ret.Resources)
-	if allOk(resources, node.HealthType) {
-		ret.Status = Healthy
+	if allOk(resources, node.Health.ConditionType) {
+		ret.Status = mklv1alpha1.ResourceHealthy
 	}
 
 	for _, res := range resources {

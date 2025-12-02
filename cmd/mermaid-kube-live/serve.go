@@ -12,6 +12,7 @@ import (
 
 	"sigs.k8s.io/multicluster-runtime/providers/file"
 
+	mklv1alpha1 "github.com/ntnn/mermaid-kube-live/apis/v1alpha1"
 	mkl "github.com/ntnn/mermaid-kube-live/pkg/mermaid-kube-live"
 )
 
@@ -105,9 +106,14 @@ func (s *Serve) Run() error {
 		}
 		diagram := string(rawDiagram) + "\n"
 
-		config, err := mkl.ParseFile(s.Config)
+		config, err := mklv1alpha1.ParseFile(s.Config)
 		if err != nil {
 			log.Printf("failed to read config file %s: %v", s.Config, err)
+			continue
+		}
+
+		if err := config.Validate(ctx); err != nil {
+			log.Printf("invalid config file %s: %v", s.Config, err)
 			continue
 		}
 
@@ -118,7 +124,7 @@ func (s *Serve) Run() error {
 		}
 
 		for name, state := range nodeStates {
-			style, ok := config.StatusStyle[state.Status]
+			style, ok := config.Style.Status[state.Status]
 			if !ok {
 				log.Printf("unknown status %s for node %s, skipping", state.Status, name)
 				continue
