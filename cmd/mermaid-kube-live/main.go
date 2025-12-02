@@ -23,8 +23,7 @@ func (c CommonFlags) kubeconfig() []string {
 }
 
 var CLI struct {
-	Serve    Serve    `cmd:"" help:"Serve the diagram over HTTP."`
-	Generate Generate `cmd:"" help:"Generate the diagram and config file."`
+	Serve Serve `cmd:"" help:"Serve the diagram over HTTP."`
 }
 
 func main() {
