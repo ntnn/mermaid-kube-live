@@ -33,6 +33,12 @@ jobs:
         with:
           go-version-file: 'go.mod'
       - run: |
+          make codegen
+          if [[ "$(git status --porcelain | wc -l)" -ne 0 ]]; then
+            echo "::error::Missing codegen run."
+            exit 1
+          fi
+      - run: |
           make fmt
           if [[ "$(git status --porcelain | wc -l)" -ne 0 ]]; then
             echo "::error::Go files are not formatted correctly."
