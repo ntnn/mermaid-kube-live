@@ -21,11 +21,11 @@ func (rs ResourceStatus) String() string {
 func (rs ResourceStatus) DefaultStyle() string {
 	switch rs {
 	case ResourceAbsent:
-		return "stroke:#808080"
+		return "stroke:grey,stroke-width:4px"
 	case ResourcePending:
-		return "stroke:#FFFF00"
+		return "stroke:yellow,stroke-width:4px,fill:lightyellow"
 	case ResourceHealthy:
-		return "stroke:#00FF00"
+		return "stroke:green,stroke-width:4px,fill:lightgreen"
 	default:
 		return ""
 	}
