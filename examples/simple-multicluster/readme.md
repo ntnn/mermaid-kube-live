@@ -18,8 +18,8 @@ Start two kind clusters:
 Next start mermaid-kube-live:
 
     go run ../../cmd/mermaid-kube-live serve \
-        --config ./config.yaml \
-        --diagram ./diagram.mermaid \
+        --config ./mkl.yaml \
+        --diagram ./mkl.mermaid \
         --kubeconfig ./kubeconfig.yaml
 
 Then open the browser at http://localhost:8080 and you should see the
@@ -49,16 +49,17 @@ green in the second cluster as well:
 
 ![Image](https://github.com/user-attachments/assets/b8c9882f-963e-46c4-8679-de069d7650d7)
 
-Now for the fun part - create a new kind cluster:
+Now create a new kind cluster:
 
     kind create cluster --name cluster3 --kubeconfig ./kubeconfig.yaml
 
 Kind will start the cluster cluster and add it to the kubeconfig file.
 The script copying the resources already knows about this cluster and
-will automatically copy the secret to it.
+will automatically copy the secret to it on the next iteration.
 
-mermaid-kube-live will automatically detect the new cluster in the
-kubeconfig and update its node in the diagram:
+mermaid-kube-live has been configured to watch for this cluster as well,
+so it will automatically detect the new cluster in the kubeconfig and
+update its node in the diagram:
 
 ![Image](https://github.com/user-attachments/assets/f2f05b1c-b6fd-4336-8299-b2bce4af32d6)
 
