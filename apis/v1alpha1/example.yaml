@@ -1,14 +1,23 @@
 ---
+# nodes is a map of all nodes in the diagram.
+# The key is the name of the node in the mermaid diagram.
 nodes:
-  # The node name is the name of the node in the diagram.
+
   node1:
+
+    # Each node must have a selector to identify the resource in the clusters.
     selector:
-      # clusterName is required to specify which cluster to query. The
-      # clusterName is the path to the kubeconfig file concatenated with
-      # the context name, separated by a plus sign.
-      clusterName: ./kubeconfig+kind-kind
+      # clusterName is required to specify which cluster to query for
+      # the resource. The clusterName is the path to the kubeconfig file
+      # as passed to mkl concatenated with the context name, separated
+      # by a plus sign.
+      # E.g. if the path to the kubeconfig is `../kubeconfig.yaml` and
+      # the context name is `kind-kind`, then the clusterName is
+      # `../kubeconfig.yaml+kind-kind`.
+      clusterName: ./kubeconfig.yaml+kind-kind
       # namespace is not optional for namespaced resources.
       namespace: default
+      # The GVR is required.
       gvr:
         # For built-in resources, the group can be left empty.
         group: ""
@@ -23,6 +32,7 @@ nodes:
   node2:
     selector:
       clusterName: ./kubeconfig+kind-kind
+      # Resources can also be selected by their name.
       name: resource-name
       gvr:
         version: v1
@@ -40,7 +50,11 @@ nodes:
       gvr:
         version: v1
         resource: pods
-      # resources can also be selected by their owner
+      # resources can also be selected by their owner. Note that owners
+      # can only be specified using the name and GVR.
+      # The namespace is implicitly the same as the namespace of the
+      # resource being selected or no namespace for cluster-scoped
+      # resources.
       owner:
         gvr:
           group: apps
