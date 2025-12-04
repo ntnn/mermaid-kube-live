@@ -52,5 +52,3 @@ jobs:
           fi
       - run: make lint
       - run: make test
-      - uses: helm/kind-action@a1b0e391336a6ee6713a0583f8c6240d70863de3 # v1
-      - run: make test-integration

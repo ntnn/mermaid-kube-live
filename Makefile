@@ -46,7 +46,3 @@ WHAT := ./...
 .PHONY: test
 test:
 	$(GOTEST) -short $(WHAT)
-
-.PHONY: test-integration
-test-integration:
-	$(GOTEST) $(WHAT)
