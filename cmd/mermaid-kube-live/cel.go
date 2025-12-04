@@ -12,6 +12,7 @@ import (
 	"github.com/google/cel-go/common/types"
 	"github.com/google/cel-go/common/types/ref"
 	"github.com/google/cel-go/ext"
+
 	mkl "github.com/ntnn/mermaid-kube-live/pkg/mermaid-kube-live"
 )
 
