@@ -8,8 +8,8 @@ import (
 )
 
 type CommonFlags struct {
-	Config     string   `short:"c" help:"Configuration file" required:"true" default:"config.yaml"`
-	Diagram    string   `short:"d" help:"Diagram file" required:"true" default:"diagram.mermaid"`
+	Config     string   `short:"c" help:"Configuration file" required:"true" default:"mkl.yaml"`
+	Diagram    string   `short:"d" help:"Diagram file" required:"true" default:"mkl.mermaid"`
 	Kubeconfig []string `sep:"," short:"k" help:"Comma-separated list of kubeconfigs" env:"KUBECONFIG" default:""`
 }
 
