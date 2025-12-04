@@ -33,22 +33,8 @@ jobs:
         with:
           go-version-file: 'go.mod'
       - run: |
-          make codegen
+          make check
           if [[ "$(git status --porcelain | wc -l)" -ne 0 ]]; then
-            echo "::error::Missing codegen run."
+            echo "::error::check recipe produced changes."
             exit 1
           fi
-      - run: |
-          make fmt
-          if [[ "$(git status --porcelain | wc -l)" -ne 0 ]]; then
-            echo "::error::Go files are not formatted correctly."
-            exit 1
-          fi
-      - run: |
-          make imports
-          if [[ "$(git status --porcelain | wc -l)" -ne 0 ]]; then
-            echo "::error::Go imports are not formatted correctly."
-            exit 1
-          fi
-      - run: make lint
-      - run: make test
