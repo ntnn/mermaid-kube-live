@@ -126,8 +126,13 @@ func (s *Serve) Run() error {
 		for name, state := range nodeStates {
 			style, ok := config.Style.Status[state.Status]
 			if !ok {
-				log.Printf("unknown status %s for node %s, skipping", state.Status, name)
-				continue
+				style = state.Status.DefaultStyle()
+				if style == "" {
+					// TODO maybe a fallback style, e.g. red outline for
+					// unknown status?
+					log.Printf("unknown status %s for node %s and no default style available, skipping", state.Status, name)
+					continue
+				}
 			}
 			diagram += fmt.Sprintf("style %s %s\n", name, style)
 			if configLabel := config.Nodes[name].Label; configLabel != "" {
