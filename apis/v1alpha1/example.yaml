@@ -1,0 +1,55 @@
+---
+nodes:
+  # The node name is the name of the node in the diagram.
+  node1:
+    selector:
+      # clusterName is required to specify which cluster to query. The
+      # clusterName is the path to the kubeconfig file concatenated with
+      # the context name, separated by a plus sign.
+      clusterName: ./kubeconfig+kind-kind
+      # namespace is not optional for namespaced resources.
+      namespace: default
+      gvr:
+        # For built-in resources, the group can be left empty.
+        group: ""
+        version: v1
+        resource: pods
+      # labelSelector can be used to filter resources by labels or
+      # expressions.
+      labelSelector:
+        matchLabels:
+          key: value
+
+  node2:
+    selector:
+      clusterName: ./kubeconfig+kind-kind
+      name: resource-name
+      gvr:
+        version: v1
+        resource: configmaps
+    health:
+      # Some resources do not have status conditions, so their presence
+      # alone is used to determine the health of the node.
+      # This is the default behaviour if no other option is specified.
+      whenPresent: true
+
+  node3:
+    selector:
+      clusterName: ./kubeconfig+kind-kind
+      namespace: default
+      gvr:
+        version: v1
+        resource: pods
+      # resources can also be selected by their owner
+      owner:
+        gvr:
+          group: apps
+          version: v1
+          resource: deployments
+        name: my-deployment
+    health:
+      # Resources with conditions can be evaluated based on the status
+      # of a specific condition.
+      conditionType: Ready
+
+

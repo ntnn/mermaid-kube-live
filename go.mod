@@ -5,6 +5,8 @@ go 1.24.4
 tool (
 	github.com/golangci/golangci-lint/v2/cmd/golangci-lint
 	golang.org/x/tools/cmd/goimports
+	k8s.io/code-generator/cmd/deepcopy-gen
+	k8s.io/code-generator/cmd/validation-gen
 )
 
 require (
@@ -256,6 +258,8 @@ require (
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 	honnef.co/go/tools v0.6.1 // indirect
+	k8s.io/code-generator v0.34.2 // indirect
+	k8s.io/gengo/v2 v2.0.0-20250604051438-85fd79dbfd9f // indirect
 	k8s.io/klog/v2 v2.130.1 // indirect
 	k8s.io/kube-openapi v0.0.0-20250710124328-f3f2b991d03b // indirect
 	k8s.io/utils v0.0.0-20250604170112-4c0f3b243397 // indirect

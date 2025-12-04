@@ -1,32 +1,25 @@
-statusStyle:
-  absent: fill:grey
-  pending: fill:yellow
-  healthy: stroke:green
 nodes:
   cluster1secret:
     selector:
-      cluster: kind-cluster1
+      clusterName: ./kubeconfig.yaml+kind-cluster1
       namespace: default
       gvr:
         version: v1
         resource: secrets
       name: our-first-secret
-    healthyWhenPresent: true
   cluster2secret:
     selector:
-      cluster: kind-cluster2
+      clusterName: ./kubeconfig.yaml+kind-cluster2
       namespace: default
       gvr:
         version: v1
         resource: secrets
       name: our-first-secret
-    healthyWhenPresent: true
   cluster3secret:
     selector:
-      cluster: kind-cluster3
+      clusterName: ./kubeconfig.yaml+kind-cluster3
       namespace: default
       gvr:
         version: v1
         resource: secrets
       name: our-first-secret
-    healthyWhenPresent: true
