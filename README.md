@@ -4,6 +4,6 @@ mermaid-kube-live (`mkl` in short) is a tool to style and label [mermaid](https:
 
 ## Config
 
-The configuration is documentes in [apis/v1alpha1](./apis/v1alpha1) and an annotated example is available here: [example.yaml](apis/v1alpha1/example.yaml).
+The configuration is documented in [apis/v1alpha1](./apis/v1alpha1) and an annotated configuration example is available here: [example.yaml](apis/v1alpha1/example.yaml).
 
-Examples can be viewed in the [examples](./examples) directory.
+Full examples with matching mermaid diagrams are available in the [examples](./examples) directory.
