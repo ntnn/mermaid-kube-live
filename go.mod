@@ -13,9 +13,9 @@ require (
 	github.com/alecthomas/kong v1.13.0
 	github.com/google/cel-go v0.26.1
 	github.com/stretchr/testify v1.11.1
-	k8s.io/api v0.34.2
-	k8s.io/apimachinery v0.34.2
-	k8s.io/client-go v0.34.2
+	k8s.io/api v0.34.3
+	k8s.io/apimachinery v0.34.3
+	k8s.io/client-go v0.34.3
 	sigs.k8s.io/controller-runtime v0.22.4
 	sigs.k8s.io/multicluster-runtime v0.22.0-beta.0.0.20251125143240-ecfcc1d4b871
 	sigs.k8s.io/multicluster-runtime/providers/file v0.22.0-beta.0.0.20251125143240-ecfcc1d4b871
@@ -258,7 +258,7 @@ require (
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 	honnef.co/go/tools v0.6.1 // indirect
-	k8s.io/code-generator v0.34.2 // indirect
+	k8s.io/code-generator v0.34.3 // indirect
 	k8s.io/gengo/v2 v2.0.0-20250604051438-85fd79dbfd9f // indirect
 	k8s.io/klog/v2 v2.130.1 // indirect
 	k8s.io/kube-openapi v0.0.0-20250710124328-f3f2b991d03b // indirect
