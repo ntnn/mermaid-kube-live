@@ -22,6 +22,7 @@ func init() { localSchemeBuilder.Register(RegisterValidations) }
 // RegisterValidations adds validation functions to the given scheme.
 // Public to allow building arbitrary schemes.
 func RegisterValidations(scheme *runtime.Scheme) error {
+	// type Config
 	scheme.AddValidationFunc((*Config)(nil), func(ctx context.Context, op operation.Operation, obj, oldObj interface{}) field.ErrorList {
 		switch op.Request.SubresourcePath() {
 		case "/":
@@ -32,49 +33,68 @@ func RegisterValidations(scheme *runtime.Scheme) error {
 	return nil
 }
 
+// Validate_Config validates an instance of Config according
+// to declarative validation rules in the API schema.
 func Validate_Config(ctx context.Context, op operation.Operation, fldPath *field.Path, obj, oldObj *Config) (errs field.ErrorList) {
 	// field Config.TypeMeta has no validation
 	// field Config.Style has no validation
 
 	// field Config.Nodes
 	errs = append(errs,
-		func(fldPath *field.Path, obj, oldObj map[string]Node) (errs field.ErrorList) {
-			if op.Type == operation.Update && equality.Semantic.DeepEqual(obj, oldObj) {
-				return nil // no changes
+		func(fldPath *field.Path, obj, oldObj map[string]Node, oldValueCorrelated bool) (errs field.ErrorList) {
+			// don't revalidate unchanged data
+			if oldValueCorrelated && op.Type == operation.Update && equality.Semantic.DeepEqual(obj, oldObj) {
+				return nil
 			}
+			// iterate the map and call the value type's validation function
 			errs = append(errs, validate.EachMapVal(ctx, op, fldPath, obj, oldObj, validate.SemanticDeepEqual, Validate_Node)...)
 			return
-		}(fldPath.Child("nodes"), obj.Nodes, safe.Field(oldObj, func(oldObj *Config) map[string]Node { return oldObj.Nodes }))...)
+		}(fldPath.Child("nodes"), obj.Nodes, safe.Field(oldObj, func(oldObj *Config) map[string]Node { return oldObj.Nodes }), oldObj != nil)...)
 
 	return errs
 }
 
+// Validate_Node validates an instance of Node according
+// to declarative validation rules in the API schema.
 func Validate_Node(ctx context.Context, op operation.Operation, fldPath *field.Path, obj, oldObj *Node) (errs field.ErrorList) {
 	// field Node.Selector
 	errs = append(errs,
-		func(fldPath *field.Path, obj, oldObj *NodeSelector) (errs field.ErrorList) {
+		func(fldPath *field.Path, obj, oldObj *NodeSelector, oldValueCorrelated bool) (errs field.ErrorList) {
+			// don't revalidate unchanged data
+			if oldValueCorrelated && op.Type == operation.Update && equality.Semantic.DeepEqual(obj, oldObj) {
+				return nil
+			}
+			// call the type's validation function
 			errs = append(errs, Validate_NodeSelector(ctx, op, fldPath, obj, oldObj)...)
 			return
-		}(fldPath.Child("selector"), &obj.Selector, safe.Field(oldObj, func(oldObj *Node) *NodeSelector { return &oldObj.Selector }))...)
+		}(fldPath.Child("selector"), &obj.Selector, safe.Field(oldObj, func(oldObj *Node) *NodeSelector { return &oldObj.Selector }), oldObj != nil)...)
 
 	// field Node.Health has no validation
 	// field Node.Label has no validation
 	return errs
 }
 
+// Validate_NodeSelector validates an instance of NodeSelector according
+// to declarative validation rules in the API schema.
 func Validate_NodeSelector(ctx context.Context, op operation.Operation, fldPath *field.Path, obj, oldObj *NodeSelector) (errs field.ErrorList) {
 	// field NodeSelector.ClusterName
 	errs = append(errs,
-		func(fldPath *field.Path, obj, oldObj *string) (errs field.ErrorList) {
-			if op.Type == operation.Update && (obj == oldObj || (obj != nil && oldObj != nil && *obj == *oldObj)) {
-				return nil // no changes
+		func(fldPath *field.Path, obj, oldObj *string, oldValueCorrelated bool) (errs field.ErrorList) {
+			// don't revalidate unchanged data
+			if oldValueCorrelated && op.Type == operation.Update && (obj == oldObj || (obj != nil && oldObj != nil && *obj == *oldObj)) {
+				return nil
 			}
+			// call field-attached validations
+			earlyReturn := false
 			if e := validate.RequiredValue(ctx, op, fldPath, obj, oldObj); len(e) != 0 {
 				errs = append(errs, e...)
+				earlyReturn = true
+			}
+			if earlyReturn {
 				return // do not proceed
 			}
 			return
-		}(fldPath.Child("clusterName"), &obj.ClusterName, safe.Field(oldObj, func(oldObj *NodeSelector) *string { return &oldObj.ClusterName }))...)
+		}(fldPath.Child("clusterName"), &obj.ClusterName, safe.Field(oldObj, func(oldObj *NodeSelector) *string { return &oldObj.ClusterName }), oldObj != nil)...)
 
 	// field NodeSelector.GVR has no validation
 	// field NodeSelector.Name has no validation
