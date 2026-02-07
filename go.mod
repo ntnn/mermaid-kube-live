@@ -10,7 +10,7 @@ tool (
 )
 
 require (
-	github.com/alecthomas/kong v1.13.0
+	github.com/alecthomas/kong v1.14.0
 	github.com/google/cel-go v0.27.0
 	github.com/stretchr/testify v1.11.1
 	k8s.io/api v0.35.0
