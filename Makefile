@@ -23,9 +23,6 @@ codegen:
 build: bin codegen
 	$(GO) build -o bin/mermaid-kube-live ./cmd/mermaid-kube-live
 
-.PHONY: check
-check: fmt imports lint test
-
 .PHONY: fmt
 fmt:
 	$(GO) fmt ./...
