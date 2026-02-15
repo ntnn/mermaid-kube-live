@@ -15,10 +15,10 @@ func TestValidate(t *testing.T) {
 			"node": {
 				Selector: NodeSelector{
 					ClusterName: "cluster",
-					GVR: schema.GroupVersionResource{
-						Group:    "apps",
-						Version:  "v1",
-						Resource: "deployments",
+					GVK: schema.GroupVersionKind{
+						Group:   "apps",
+						Version: "v1",
+						Kind:    "Deployment",
 					},
 					Namespace: "default",
 					Name:      "my-deployment",
@@ -33,10 +33,10 @@ func TestValidate(t *testing.T) {
 			"node": {
 				Selector: NodeSelector{
 					ClusterName: "",
-					GVR: schema.GroupVersionResource{
-						Group:    "apps",
-						Version:  "v1",
-						Resource: "deployments",
+					GVK: schema.GroupVersionKind{
+						Group:   "apps",
+						Version: "v1",
+						Kind:    "Deployment",
 					},
 					Namespace: "default",
 					Name:      "my-deployment",

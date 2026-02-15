@@ -3,23 +3,23 @@ nodes:
     selector:
       clusterName: ./kubeconfig.yaml+kind-cluster1
       namespace: default
-      gvr:
+      gvk:
         version: v1
-        resource: secrets
+        kind: Secret
       name: our-first-secret
   cluster2secret:
     selector:
       clusterName: ./kubeconfig.yaml+kind-cluster2
       namespace: default
-      gvr:
+      gvk:
         version: v1
-        resource: secrets
+        kind: Secret
       name: our-first-secret
   cluster3secret:
     selector:
       clusterName: ./kubeconfig.yaml+kind-cluster3
       namespace: default
-      gvr:
+      gvk:
         version: v1
-        resource: secrets
+        kind: Secret
       name: our-first-secret
