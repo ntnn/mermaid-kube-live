@@ -4,6 +4,8 @@ GOLANGCI_LINT ?= $(GO) tool golangci-lint
 DEEPCOPY_GEN := $(GO) tool deepcopy-gen
 VALIDATION_GEN := $(GO) tool validation-gen
 
+WHAT ?= ./...
+
 .PHONY: check
 check: codegen fmt lint test
 
@@ -25,19 +27,18 @@ build: bin codegen
 
 .PHONY: fmt
 fmt:
-	$(GO) fmt ./...
+	$(GO) fmt $(WHAT)
 
 .PHONY: lint
 lint:
-	$(GOLANGCI_LINT) run ./...
+	$(GOLANGCI_LINT) run $(WHAT)
 
 .PHONY: lint-fix
 lint-fix:
-	$(GOLANGCI_LINT) run --fix ./...
+	$(GOLANGCI_LINT) run --fix $(WHAT)
 
 NPROC ?= $(shell nproc)
 GOTEST := $(GO) test -v -race -parallel $(NPROC)
-WHAT := ./...
 
 .PHONY: test
 test:
