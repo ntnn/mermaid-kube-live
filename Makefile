@@ -31,6 +31,10 @@ fmt:
 lint:
 	$(GOLANGCI_LINT) run ./...
 
+.PHONY: lint-fix
+lint-fix:
+	$(GOLANGCI_LINT) run --fix ./...
+
 NPROC ?= $(shell nproc)
 GOTEST := $(GO) test -v -race -parallel $(NPROC)
 WHAT := ./...
