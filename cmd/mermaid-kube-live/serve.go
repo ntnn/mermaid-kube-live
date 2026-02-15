@@ -2,18 +2,19 @@ package main
 
 import (
 	"context"
-	_ "embed"
+	"errors"
 	"fmt"
 	"log"
-	"net/http"
 	"os"
+	"strings"
 	"sync"
 	"time"
 
-	"sigs.k8s.io/multicluster-runtime/providers/file"
-
 	mklv1alpha1 "github.com/ntnn/mermaid-kube-live/apis/v1alpha1"
 	mkl "github.com/ntnn/mermaid-kube-live/pkg/mermaid-kube-live"
+	"sigs.k8s.io/multicluster-runtime/pkg/multicluster"
+
+	_ "embed"
 )
 
 //go:embed serve.html
@@ -27,136 +28,92 @@ type Serve struct {
 
 	notifyChan chan struct{}
 
-	Host string `help:"Host to listen on" default:"localhost"`
-	Port int    `help:"Port to listen on" default:"8080"`
+	Host string `default:"localhost" help:"Host to listen on"`
+	Port int    `default:"8080"      help:"Port to listen on"`
 
-	UpdateInterval time.Duration `short:"i" help:"Interval to update the diagram" default:"1s"`
+	provider multicluster.Provider
+
+	UpdateInterval time.Duration `default:"1s" help:"Interval to update the diagram" short:"i"`
 }
 
 func (s *Serve) Run() error {
 	ctx := context.Background()
 
-	// Serve the main page
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "text/html")
-		w.WriteHeader(http.StatusOK)
-		if _, err := w.Write([]byte(mainPage)); err != nil {
-			log.Printf("failed to write response: %v", err)
-		}
-	})
+	s.httpServer(ctx)
 
-	// Serve the built diagram
-	http.HandleFunc("/diagram", func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "text/plain")
-		w.WriteHeader(http.StatusOK)
-		s.builtDiagramLock.Lock()
-		ret := []byte(s.builtDiagram)
-		s.builtDiagramLock.Unlock()
-		if _, err := w.Write(ret); err != nil {
-			log.Printf("failed to write response: %v", err)
-		}
-	})
-
-	// Event loop to notify clients about diagram updates
-	s.notifyChan = make(chan struct{}, 10)
-	http.HandleFunc("/events", func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "text/event-stream")
-		w.Header().Set("Cache-Control", "no-cache")
-		w.Header().Set("Connection", "keep-alive")
-
-		defer r.Context().Done()
-		for range s.notifyChan {
-			if _, err := fmt.Fprintf(w, "data: diagram updated\n\n"); err != nil {
-				log.Printf("failed to write to response: %v", err)
-				return
-			}
-			w.(http.Flusher).Flush()
-		}
-	})
-
-	log.Printf("starting webserver on %s:%d", s.Host, s.Port)
-	go func() {
-		if err := http.ListenAndServe(fmt.Sprintf("%s:%d", s.Host, s.Port), nil); err != nil {
-			log.Printf("error from the web server: %v", err)
-		}
-	}()
-
-	log.Printf("starting kubeconfig provider with files: %s", s.kubeconfig())
-
-	provider, err := file.New(file.Options{
-		KubeconfigFiles: s.kubeconfig(),
-	})
-	if err != nil {
-		return fmt.Errorf("error getting provider: %w", err)
+	if err := s.startProvider(ctx); err != nil {
+		return fmt.Errorf("failed to start provider: %w", err)
 	}
-	if err := provider.RunOnce(ctx, nil); err != nil {
-		return fmt.Errorf("error running provider once: %w", err)
-	}
-	go func() {
-		if err := provider.Start(ctx, nil); err != nil {
-			log.Printf("provider errored: %v", err)
-		}
-	}()
 
 	for range time.Tick(s.UpdateInterval) {
-		rawDiagram, err := os.ReadFile(s.Diagram)
-		if err != nil {
-			log.Printf("failed to read diagram file %s: %v", s.Diagram, err)
-			continue
+		if err := s.iteration(ctx); err != nil {
+			log.Printf("%v", err)
 		}
-		diagram := string(rawDiagram) + "\n"
-
-		config, err := mklv1alpha1.ParseFile(s.Config)
-		if err != nil {
-			log.Printf("failed to read config file %s: %v", s.Config, err)
-			continue
-		}
-
-		if err := config.Validate(ctx); err != nil {
-			log.Printf("invalid config file %s: %v", s.Config, err)
-			continue
-		}
-
-		nodeStates, err := mkl.GetResourceStates(ctx, provider, config.Nodes)
-		if err != nil {
-			log.Printf("failed to get resource states, skipping update: %v", err)
-			continue
-		}
-
-		for name, state := range nodeStates {
-			style, ok := config.Style.Status[state.Status]
-			if !ok {
-				style = state.Status.DefaultStyle()
-				if style == "" {
-					// TODO maybe a fallback style, e.g. red outline for
-					// unknown status?
-					log.Printf("unknown status %s for node %s and no default style available, skipping", state.Status, name)
-					continue
-				}
-			}
-			diagram += fmt.Sprintf("style %s %s\n", name, style)
-			if configLabel := config.Nodes[name].Label; configLabel != "" {
-				label, err := expandLabel(ctx, configLabel, state)
-				if err != nil {
-					log.Printf("failed to expand label for node %s, skipping label update: %v", name, err)
-					continue
-				}
-				diagram += fmt.Sprintf("%s[%s]\n", name, label)
-			}
-		}
-
-		if s.builtDiagram == diagram {
-			log.Println("diagram is unchanged, skipping update")
-			continue
-		}
-
-		s.builtDiagramLock.Lock()
-		s.builtDiagram = diagram
-		s.builtDiagramLock.Unlock()
-
-		log.Println("diagram updated successfully, notifying clients")
-		s.notifyChan <- struct{}{}
 	}
+
+	return nil
+}
+
+func (s *Serve) iteration(ctx context.Context) error { //nolint:cyclop
+	rawDiagram, err := os.ReadFile(s.Diagram)
+	if err != nil {
+		return fmt.Errorf("failed to read diagram file %s: %w", s.Diagram, err)
+	}
+
+	diagram := string(rawDiagram) + "\n"
+
+	config, err := mklv1alpha1.ParseFile(s.Config)
+	if err != nil {
+		return fmt.Errorf("failed to read config file %s: %w", s.Config, err)
+	}
+
+	if err := config.Validate(ctx); err != nil {
+		return fmt.Errorf("invalid config file %s: %w", s.Config, err)
+	}
+
+	nodeStates, err := mkl.GetResourceStates(ctx, s.provider, config.Nodes)
+	if err != nil {
+		return fmt.Errorf("failed to get resource states, skipping update: %w", err)
+	}
+
+	var diagramSb126 strings.Builder
+
+	for name, state := range nodeStates {
+		style, ok := config.Style.Status[state.Status]
+		if !ok {
+			style = state.Status.DefaultStyle()
+			if style == "" {
+				// TODO maybe a fallback style, e.g. red outline for
+				// unknown status?
+				return fmt.Errorf("unknown status %s for node %s and no default style available, skippinw", state.Status, name)
+			}
+		}
+
+		diagramSb126.WriteString(fmt.Sprintf("style %s %s\n", name, style))
+
+		if configLabel := config.Nodes[name].Label; configLabel != "" {
+			label, err := expandLabel(ctx, configLabel, state)
+			if err != nil {
+				return fmt.Errorf("failed to expand label for node %s, skipping label update: %w", name, err)
+			}
+
+			diagramSb126.WriteString(fmt.Sprintf("%s[%s]\n", name, label))
+		}
+	}
+
+	diagram += diagramSb126.String()
+
+	if s.builtDiagram == diagram {
+		return errors.New("diagram is unchanged, skipping updatw")
+	}
+
+	s.builtDiagramLock.Lock()
+	s.builtDiagram = diagram
+	s.builtDiagramLock.Unlock()
+
+	log.Println("diagram updated successfully, notifying clients")
+
+	s.notifyChan <- struct{}{}
 
 	return nil
 }

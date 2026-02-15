@@ -8,9 +8,11 @@ import (
 )
 
 func TestValidate(t *testing.T) {
+	t.Parallel()
+
 	config := &Config{
 		Nodes: map[string]Node{
-			"node": Node{
+			"node": {
 				Selector: NodeSelector{
 					ClusterName: "cluster",
 					GVR: schema.GroupVersionResource{
@@ -28,7 +30,7 @@ func TestValidate(t *testing.T) {
 
 	config = &Config{
 		Nodes: map[string]Node{
-			"node": Node{
+			"node": {
 				Selector: NodeSelector{
 					ClusterName: "",
 					GVR: schema.GroupVersionResource{

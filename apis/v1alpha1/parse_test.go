@@ -8,6 +8,7 @@ import (
 
 func TestParseFile(t *testing.T) {
 	t.Parallel()
+
 	c, err := ParseFile("example.yaml")
 	require.NoError(t, err)
 	require.NotNil(t, c)
@@ -15,7 +16,7 @@ func TestParseFile(t *testing.T) {
 	require.NotEmpty(t, c.Nodes)
 
 	require.Contains(t, c.Nodes, "node1")
-	require.Equal(t, c.Nodes["node1"].Selector.Namespace, "default")
+	require.Equal(t, "default", c.Nodes["node1"].Selector.Namespace)
 	require.Contains(t, c.Nodes, "node2")
-	require.Equal(t, c.Nodes["node2"].Selector.ClusterName, "./kubeconfig+kind-kind")
+	require.Equal(t, "./kubeconfig+kind-kind", c.Nodes["node2"].Selector.ClusterName)
 }

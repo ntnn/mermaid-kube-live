@@ -1,3 +1,5 @@
+// mermaid-kube-live is a tool to colour mermaid diagrams based on live
+// Kubernetes cluster data.
 package main
 
 import (
@@ -8,15 +10,16 @@ import (
 )
 
 type CommonFlags struct {
-	Config     string   `short:"c" help:"Configuration file" required:"true" default:"mkl.yaml"`
-	Diagram    string   `short:"d" help:"Diagram file" required:"true" default:"mkl.mermaid"`
-	Kubeconfig []string `sep:"," short:"k" help:"Comma-separated list of kubeconfigs" env:"KUBECONFIG" default:""`
+	Config     string   `default:"mkl.yaml"    help:"Configuration file" required:"true"                            short:"c"`
+	Diagram    string   `default:"mkl.mermaid" help:"Diagram file"       required:"true"                            short:"d"`
+	Kubeconfig []string `default:""            env:"KUBECONFIG"          help:"Comma-separated list of kubeconfigs" sep:","   short:"k"`
 }
 
 func (c CommonFlags) kubeconfig() []string {
 	if len(c.Kubeconfig) > 0 {
 		return c.Kubeconfig
 	}
+
 	return []string{
 		os.ExpandEnv("$HOME/.kube/config"),
 	}
