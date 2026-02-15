@@ -15,7 +15,7 @@ type Config struct {
 	metav1.TypeMeta `json:",inline"`
 
 	// Style defines base values for dynamic styling of the diagram.
-	Style Style `json:"style,omitempty"`
+	Style Style `json:"style,omitzero"`
 
 	// Nodes is a map of node names to their configuration.
 	Nodes map[string]Node `json:"nodes,omitempty"`
@@ -53,7 +53,7 @@ type Node struct {
 	Selector NodeSelector `json:"selector"`
 
 	// Health defines how to determine the health of the node.
-	Health Health `json:"health,omitempty"`
+	Health Health `json:"health,omitzero"`
 
 	// Label is an optional label to display for the node.
 	// This is a CEL expression.
@@ -76,17 +76,17 @@ type NodeSelector struct {
 	Namespace string `json:"namespace,omitempty"`
 
 	// LabelSelector is the label selector to select resources.
-	LabelSelector metav1.LabelSelector `json:"labelSelector,omitempty"`
+	LabelSelector metav1.LabelSelector `json:"labelSelector,omitzero"`
 
 	// If set, select resources owned by the specified owner.
 	// This is still bound by the GVR and Namespace fields.
-	Owner OwnerReference `json:"owner,omitempty"`
+	Owner OwnerReference `json:"owner,omitzero"`
 }
 
 // OwnerReference defines an owner resource to select by.
 type OwnerReference struct {
 	// GVR is the GroupVersionResource of the owner.
-	GVR schema.GroupVersionResource `json:"gvr,omitempty"`
+	GVR schema.GroupVersionResource `json:"gvr,omitzero"`
 	// Name is the name of the owner resource.
 	Name string `json:"name,omitempty"`
 }

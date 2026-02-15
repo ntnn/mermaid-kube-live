@@ -12,7 +12,6 @@ import (
 	"github.com/google/cel-go/common/types"
 	"github.com/google/cel-go/common/types/ref"
 	"github.com/google/cel-go/ext"
-
 	mkl "github.com/ntnn/mermaid-kube-live/pkg/mermaid-kube-live"
 )
 
@@ -20,7 +19,7 @@ var env *cel.Env
 
 func init() {
 	envOpts := []cel.EnvOption{
-		ext.NativeTypes(reflect.TypeOf(&mkl.ResourceState{})),
+		ext.NativeTypes(reflect.TypeFor[*mkl.ResourceState]()),
 		cel.Variable("rs", cel.DynType),
 
 		ext.Bindings(),
@@ -31,7 +30,7 @@ func init() {
 		ext.Sets(),
 		ext.Strings(),
 
-		ext.NativeTypes(reflect.TypeOf(&x509.Certificate{})),
+		ext.NativeTypes(reflect.TypeFor[*x509.Certificate]()),
 		cel.Function("parseCert",
 			cel.Overload(
 				"parseCert_dyn",
@@ -39,9 +38,11 @@ func init() {
 				cel.DynType,
 				cel.FunctionBinding(func(args ...ref.Val) ref.Val {
 					var b []byte
+
 					switch v := args[0].Value().(type) {
 					case string:
 						var err error
+
 						b, err = base64.StdEncoding.DecodeString(v)
 						if err != nil {
 							return types.WrapErr(fmt.Errorf("base64 decode failed: %w", err))
@@ -60,6 +61,7 @@ func init() {
 					if err != nil {
 						return types.WrapErr(fmt.Errorf("parseCertificate failed: %w", err))
 					}
+
 					return env.CELTypeAdapter().NativeToValue(cert)
 				}),
 			),
@@ -68,6 +70,7 @@ func init() {
 
 	// TODO place in a once
 	var err error
+
 	env, err = cel.NewEnv(envOpts...)
 	if err != nil {
 		panic(fmt.Sprintf("failed to create CEL environment: %v", err))

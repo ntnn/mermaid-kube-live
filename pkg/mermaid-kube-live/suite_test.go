@@ -14,7 +14,6 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
-
 	"sigs.k8s.io/multicluster-runtime/providers/file"
 )
 
@@ -45,6 +44,7 @@ func getOrCreate(t *testing.T, client client.Client, obj client.Object) {
 		require.NoError(t, client.Update(t.Context(), obj))
 		return
 	}
+
 	require.NoError(t, client.Create(t.Context(), obj))
 }
 
@@ -85,17 +85,19 @@ func suite(ctx context.Context) error {
 	fmt.Fprintf(os.Stderr, "The tests will create resources in the cluster, and clean them up afterwards.\n")
 
 	var err error
+
 	provider, err = file.New(file.Options{
 		KubeconfigFiles: []string{kubeEnv},
 	})
 	if err != nil {
 		return fmt.Errorf("failed to initialize provider: %w", err)
 	}
+
 	if err := provider.RunOnce(ctx, nil); err != nil {
 		return fmt.Errorf("failed to run provider: %w", err)
 	}
 
-	if _, err := provider.Get(context.Background(), clusterName); err != nil {
+	if _, err := provider.Get(ctx, clusterName); err != nil {
 		return fmt.Errorf("failed to get cluster %q: %w", clusterName, err)
 	}
 
@@ -104,12 +106,15 @@ func suite(ctx context.Context) error {
 
 func TestMain(m *testing.M) {
 	flag.Parse()
+
 	if !testing.Short() {
 		ctx, cancel := context.WithCancel(context.Background())
 		defer cancel()
+
 		if err := suite(ctx); err != nil {
 			panic("Suite initialization failed: " + err.Error())
 		}
 	}
+
 	m.Run()
 }
