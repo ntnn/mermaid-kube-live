@@ -17,12 +17,12 @@ nodes:
       clusterName: ./kubeconfig.yaml+kind-kind
       # namespace is not optional for namespaced resources.
       namespace: default
-      # The GVR is required.
-      gvr:
+      # The GVK is required.
+      gvk:
         # For built-in resources, the group can be left empty.
         group: ""
         version: v1
-        resource: pods
+        kind: Pod
       # labelSelector can be used to filter resources by labels or
       # expressions.
       labelSelector:
@@ -34,9 +34,9 @@ nodes:
       clusterName: ./kubeconfig+kind-kind
       # Resources can also be selected by their name.
       name: resource-name
-      gvr:
+      gvk:
         version: v1
-        resource: configmaps
+        kind: ConfigMap
     health:
       # Some resources do not have status conditions, so their presence
       # alone is used to determine the health of the node.
@@ -47,19 +47,19 @@ nodes:
     selector:
       clusterName: ./kubeconfig+kind-kind
       namespace: default
-      gvr:
+      gvk:
         version: v1
-        resource: pods
+        kind: Pod
       # resources can also be selected by their owner. Note that owners
       # can only be specified using the name and GVR.
       # The namespace is implicitly the same as the namespace of the
       # resource being selected or no namespace for cluster-scoped
       # resources.
       owner:
-        gvr:
+        gvk:
           group: apps
           version: v1
-          resource: deployments
+          kind: Deployment
         name: my-deployment
     health:
       # Resources with conditions can be evaluated based on the status

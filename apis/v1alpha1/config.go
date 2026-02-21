@@ -57,7 +57,7 @@ type Node struct {
 
 	// Label is an optional label to display for the node.
 	// This is a CEL expression.
-	// The input is the ResourceState object for the node, named `rs`.
+	// The input is a list of all matching resources at `.resources`.
 	Label string `json:"label,omitempty"`
 }
 
@@ -67,8 +67,8 @@ type NodeSelector struct {
 	//+k8s:required
 	ClusterName string `json:"clusterName"`
 
-	// GVR is the GroupVersionResource of the resources to select.
-	GVR schema.GroupVersionResource `json:"gvr"`
+	// GVK is the GroupVersionKind of the resources to select.
+	GVK schema.GroupVersionKind `json:"gvk"`
 
 	// Name is the name of the resource to select.
 	Name string `json:"name,omitempty"`
@@ -85,8 +85,8 @@ type NodeSelector struct {
 
 // OwnerReference defines an owner resource to select by.
 type OwnerReference struct {
-	// GVR is the GroupVersionResource of the owner.
-	GVR schema.GroupVersionResource `json:"gvr,omitzero"`
+	// GVK is the GroupVersionKind of the owner.
+	GVK schema.GroupVersionKind `json:"gvk,omitzero"`
 	// Name is the name of the owner resource.
 	Name string `json:"name,omitempty"`
 }

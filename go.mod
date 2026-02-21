@@ -8,16 +8,24 @@ tool (
 	k8s.io/code-generator/cmd/validation-gen
 )
 
+replace (
+	sigs.k8s.io/multicluster-runtime => github.com/ntnn/multicluster-runtime v0.23.2-0.20260220200924-cd378f0a4fa1
+	sigs.k8s.io/multicluster-runtime/providers/file => github.com/ntnn/multicluster-runtime/providers/file v0.23.2-0.20260220204151-41a0911228f5
+)
+
 require (
-	github.com/alecthomas/kong v1.14.0
+	github.com/fsnotify/fsnotify v1.9.0
+	github.com/go-logr/logr v1.4.3
 	github.com/google/cel-go v0.27.0
+	github.com/ntnn/mcutils v0.0.0-20260221160822-e249fa51cce9
 	github.com/stretchr/testify v1.11.1
-	k8s.io/api v0.35.1
 	k8s.io/apimachinery v0.35.1
 	k8s.io/client-go v0.35.1
+	k8s.io/klog/v2 v2.130.1
+	k8s.io/utils v0.0.0-20251002143259-bc988d571ff4
 	sigs.k8s.io/controller-runtime v0.23.1
-	sigs.k8s.io/multicluster-runtime v0.23.1
-	sigs.k8s.io/multicluster-runtime/providers/file v0.23.1
+	sigs.k8s.io/multicluster-runtime v0.23.2-0.20260218084539-1df3cffe603b
+	sigs.k8s.io/multicluster-runtime/providers/file v0.0.0-00010101000000-000000000000
 	sigs.k8s.io/yaml v1.6.0
 )
 
@@ -83,12 +91,10 @@ require (
 	github.com/fatih/color v1.18.0 // indirect
 	github.com/fatih/structtag v1.2.0 // indirect
 	github.com/firefart/nonamedreturns v1.0.6 // indirect
-	github.com/fsnotify/fsnotify v1.9.0 // indirect
 	github.com/fxamacker/cbor/v2 v2.9.0 // indirect
 	github.com/fzipp/gocyclo v0.6.0 // indirect
 	github.com/ghostiam/protogetter v0.3.20 // indirect
 	github.com/go-critic/go-critic v0.14.3 // indirect
-	github.com/go-logr/logr v1.4.3 // indirect
 	github.com/go-openapi/jsonpointer v0.21.0 // indirect
 	github.com/go-openapi/jsonreference v0.20.2 // indirect
 	github.com/go-openapi/swag v0.23.0 // indirect
@@ -115,6 +121,7 @@ require (
 	github.com/golangci/revgrep v0.8.0 // indirect
 	github.com/golangci/swaggoswag v0.0.0-20250504205917-77f2aca3143e // indirect
 	github.com/golangci/unconvert v0.0.0-20250410112200-a129a6e6413e // indirect
+	github.com/google/btree v1.1.3 // indirect
 	github.com/google/gnostic-models v0.7.0 // indirect
 	github.com/google/go-cmp v0.7.0 // indirect
 	github.com/google/uuid v1.6.0 // indirect
@@ -243,6 +250,7 @@ require (
 	golang.org/x/text v0.34.0 // indirect
 	golang.org/x/time v0.12.0 // indirect
 	golang.org/x/tools v0.42.0 // indirect
+	gomodules.xyz/jsonpatch/v2 v2.4.0 // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20251124214823-79d6a2a48846 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20251124214823-79d6a2a48846 // indirect
 	google.golang.org/protobuf v1.36.10 // indirect
@@ -253,11 +261,11 @@ require (
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 	honnef.co/go/tools v0.6.1 // indirect
+	k8s.io/api v0.35.1 // indirect
+	k8s.io/apiextensions-apiserver v0.35.0 // indirect
 	k8s.io/code-generator v0.35.1 // indirect
 	k8s.io/gengo/v2 v2.0.0-20250922181213-ec3ebc5fd46b // indirect
-	k8s.io/klog/v2 v2.130.1 // indirect
 	k8s.io/kube-openapi v0.0.0-20250910181357-589584f1c912 // indirect
-	k8s.io/utils v0.0.0-20251002143259-bc988d571ff4 // indirect
 	mvdan.cc/gofumpt v0.9.2 // indirect
 	mvdan.cc/unparam v0.0.0-20251027182757-5beb8c8f8f15 // indirect
 	sigs.k8s.io/json v0.0.0-20250730193827-2d320260d730 // indirect

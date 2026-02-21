@@ -1,4 +1,4 @@
-package main
+package styler
 
 import (
 	"context"
@@ -12,15 +12,23 @@ import (
 	"github.com/google/cel-go/common/types"
 	"github.com/google/cel-go/common/types/ref"
 	"github.com/google/cel-go/ext"
-	mkl "github.com/ntnn/mermaid-kube-live/pkg/mermaid-kube-live"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 )
 
-var env *cel.Env
+// CELEnv encapsulates the CEL environment and provides methods to
+// evaluate CEL expressions to generate labels based on the current
+// state of Kubernetes resources.
+type CELEnv struct {
+	Environment *cel.Env
+}
 
-func init() {
+// NewCELEnv creates and initializes a new CELEnv with the necessary cel
+// environment and custom functions for evaluating expressions.
+func NewCELEnv() (*CELEnv, error) {
+	celEnv := &CELEnv{}
+
 	envOpts := []cel.EnvOption{
-		ext.NativeTypes(reflect.TypeFor[*mkl.ResourceState]()),
-		cel.Variable("rs", cel.DynType),
+		cel.Variable("resources", cel.DynType),
 
 		ext.Bindings(),
 		ext.Encoders(),
@@ -62,33 +70,39 @@ func init() {
 						return types.WrapErr(fmt.Errorf("parseCertificate failed: %w", err))
 					}
 
-					return env.CELTypeAdapter().NativeToValue(cert)
+					return celEnv.Environment.CELTypeAdapter().NativeToValue(cert)
 				}),
 			),
 		),
 	}
 
-	// TODO place in a once
 	var err error
 
-	env, err = cel.NewEnv(envOpts...)
+	celEnv.Environment, err = cel.NewEnv(envOpts...)
 	if err != nil {
-		panic(fmt.Sprintf("failed to create CEL environment: %v", err))
+		return nil, fmt.Errorf("failed to create CEL environment: %w", err)
 	}
+
+	return celEnv, nil
 }
 
-func expandLabel(ctx context.Context, label string, resourceState mkl.ResourceState) (string, error) {
-	ast, issues := env.Compile(label)
+func (celEnv *CELEnv) expandLabel(ctx context.Context, label string, resources []unstructured.Unstructured) (string, error) {
+	ast, issues := celEnv.Environment.Compile(label)
 	if issues.Err() != nil {
 		return "", fmt.Errorf("failed to compile CEL expression %s: %w", label, issues.Err())
 	}
 
-	prg, err := env.Program(ast)
+	prg, err := celEnv.Environment.Program(ast)
 	if err != nil {
 		return "", fmt.Errorf("failed to create CEL program for expression %s: %w", label, err)
 	}
 
-	val, _, err := prg.ContextEval(ctx, map[string]any{"rs": resourceState})
+	convertedResources := make([]map[string]any, len(resources))
+	for i, resource := range resources {
+		convertedResources[i] = resource.UnstructuredContent()
+	}
+
+	val, _, err := prg.ContextEval(ctx, map[string]any{"resources": convertedResources})
 	if err != nil {
 		return "", fmt.Errorf("failed to evaluate CEL expression %s: %w", label, err)
 	}

@@ -49,11 +49,9 @@ linters:
     - interfacebloat
     - intrange
     - iotamixing
-    - ireturn
     - loggercheck
     - mirror
     - misspell
-    - mnd
     - modernize
     - musttag
     - nakedret
@@ -92,7 +90,6 @@ linters:
     - usetesting
     - wastedassign
     - whitespace
-    - wsl_v5
     - zerologlint
 
 formatters:

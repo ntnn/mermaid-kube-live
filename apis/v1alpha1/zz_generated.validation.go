@@ -96,7 +96,7 @@ func Validate_NodeSelector(ctx context.Context, op operation.Operation, fldPath 
 			return
 		}(fldPath.Child("clusterName"), &obj.ClusterName, safe.Field(oldObj, func(oldObj *NodeSelector) *string { return &oldObj.ClusterName }), oldObj != nil)...)
 
-	// field NodeSelector.GVR has no validation
+	// field NodeSelector.GVK has no validation
 	// field NodeSelector.Name has no validation
 	// field NodeSelector.Namespace has no validation
 	// field NodeSelector.LabelSelector has no validation

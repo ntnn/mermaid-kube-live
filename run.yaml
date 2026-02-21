@@ -1,0 +1,9 @@
+nodes:
+  configMap1:
+    label: '.resources[0].metadata.name + " in " + .resources[0].metadata.namespace + "\n" + .resources[0].metadata.labels["a"]'
+    selector:
+      clusterName: mkl.kubeconfig+kind-mkl
+      gvk:
+        version: v1
+        kind: ConfigMap
+      name: test-configmap

@@ -1,19 +1,17 @@
-package main
+package webserver
 
 import (
-	"context"
 	"fmt"
 	"log"
 	"net/http"
-	"time"
+
+	_ "embed"
 )
 
-const (
-	readTimeout     = 5 * time.Minute
-	shutdownTimeout = 5 * time.Second
-)
+//go:embed serve.html
+var mainPage string
 
-func (s *Serve) httpServer(ctx context.Context) {
+func (s *WebServer) buildMux() *http.ServeMux {
 	mux := http.NewServeMux()
 
 	// Serve the main page
@@ -30,17 +28,15 @@ func (s *Serve) httpServer(ctx context.Context) {
 	mux.HandleFunc("/diagram", func(w http.ResponseWriter, _ *http.Request) {
 		w.Header().Set("Content-Type", "text/plain")
 		w.WriteHeader(http.StatusOK)
-		s.builtDiagramLock.Lock()
-		ret := []byte(s.builtDiagram)
-		s.builtDiagramLock.Unlock()
+		s.diagramLock.RLock()
+		ret := make([]byte, len(s.diagram))
+		copy(ret, s.diagram)
+		s.diagramLock.RUnlock()
 
 		if _, err := w.Write(ret); err != nil {
 			log.Printf("failed to write response: %v", err)
 		}
 	})
-
-	// Event loop to notify clients about diagram updates
-	s.notifyChan = make(chan struct{})
 
 	mux.HandleFunc("/events", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/event-stream")
@@ -59,29 +55,5 @@ func (s *Serve) httpServer(ctx context.Context) {
 		}
 	})
 
-	server := &http.Server{
-		Addr:        fmt.Sprintf("%s:%d", s.Host, s.Port),
-		ReadTimeout: readTimeout,
-		Handler:     mux,
-	}
-
-	log.Printf("starting webserver on %s", server.Addr)
-
-	// TODO: if the server fails the whole program should exit.
-	go func() {
-		if err := server.ListenAndServe(); err != nil {
-			log.Printf("error from the web server: %v", err)
-		}
-	}()
-	go func() {
-		<-ctx.Done()
-		log.Println("shutting down web server")
-
-		timeoutCtx, cancel := context.WithTimeout(context.Background(), shutdownTimeout)
-		defer cancel()
-
-		if err := server.Shutdown(timeoutCtx); err != nil { //nolint:contextcheck
-			log.Printf("error shutting down web server: %v", err)
-		}
-	}()
+	return mux
 }
