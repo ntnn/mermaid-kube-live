@@ -17,10 +17,10 @@ Start two kind clusters:
 
 Next start mermaid-kube-live:
 
-    go run ../../cmd/mermaid-kube-live serve \
-        --config ./mkl.yaml \
-        --diagram ./mkl.mermaid \
-        --kubeconfig ./kubeconfig.yaml
+    go run ../.. \
+        -config ./mkl.yaml \
+        -diagram ./mkl.mermaid \
+        -kubeconfig ./kubeconfig.yaml
 
 Then open the browser at http://localhost:8080 and you should see the
 diagram with three clusters - ignore the third one for now:

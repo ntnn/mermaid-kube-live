@@ -57,7 +57,7 @@ type Node struct {
 
 	// Label is an optional label to display for the node.
 	// This is a CEL expression.
-	// The input is the ResourceState object for the node, named `rs`.
+	// The input is a list of all matching resources at `.resources`.
 	Label string `json:"label,omitempty"`
 }
 

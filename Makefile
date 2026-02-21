@@ -22,8 +22,8 @@ codegen:
 		./apis/v1alpha1
 
 .PHONY: build
-build: bin codegen
-	$(GO) build -o bin/mermaid-kube-live ./cmd/mermaid-kube-live
+build: bin
+	$(GO) build -o bin/mermaid-kube-live .
 
 .PHONY: fmt
 fmt:
@@ -38,7 +38,7 @@ lint-fix:
 	$(GOLANGCI_LINT) run --fix $(WHAT)
 
 NPROC ?= $(shell nproc)
-GOTEST := $(GO) test -v -race -parallel $(NPROC)
+GOTEST ?= $(GO) test -v -race -parallel $(NPROC)
 
 .PHONY: test
 test:

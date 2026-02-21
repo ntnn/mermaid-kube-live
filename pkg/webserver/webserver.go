@@ -17,7 +17,7 @@ const (
 
 // WebServer is a web server that serves the diagram on a web page and notifies clients about diagram updates.
 type WebServer struct {
-	Addr   string
+	Server *http.Server
 	Logger logr.Logger
 
 	// notifyChan is used to notify clients about diagram updates.
@@ -40,20 +40,27 @@ func (s *WebServer) UpdateDiagram(diagram []byte) {
 }
 
 // Start starts the web server.
-func (s *WebServer) Start(ctx context.Context) error {
+func (s *WebServer) Start(ctx context.Context, addr string) error {
 	if s.notifyChan == nil {
 		s.notifyChan = make(chan struct{}, 1)
 	}
 
-	server := &http.Server{
-		Addr:        s.Addr,
-		ReadTimeout: readTimeout,
-		Handler:     s.buildMux(),
+	if s.Server == nil {
+		s.Server = &http.Server{} //#nosec G112 - server is not exposed and the timeouts are default below
 	}
+	if s.Server.ReadTimeout == 0 {
+		s.Server.ReadTimeout = readTimeout
+	}
+	if s.Server.ReadHeaderTimeout == 0 {
+		s.Server.ReadHeaderTimeout = readTimeout
+	}
+
+	s.Server.Addr = addr
+	s.Server.Handler = s.buildMux()
 
 	// TODO: if the server fails the whole program should exit, could use RegisterOnShutdown for that
 	go func() {
-		if err := server.ListenAndServe(); err != nil {
+		if err := s.Server.ListenAndServe(); err != nil {
 			s.Logger.Error(err, "web server stopped unexpectedly")
 		}
 	}()
@@ -65,7 +72,7 @@ func (s *WebServer) Start(ctx context.Context) error {
 		timeoutCtx, cancel := context.WithTimeout(context.Background(), shutdownTimeout)
 		defer cancel()
 
-		if err := server.Shutdown(timeoutCtx); err != nil { //nolint:contextcheck
+		if err := s.Server.Shutdown(timeoutCtx); err != nil { //nolint:contextcheck
 			s.Logger.Error(err, "failed to shutdown web server gracefully")
 		}
 	}()
