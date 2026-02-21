@@ -43,3 +43,14 @@ GOTEST ?= $(GO) test -v -race -parallel $(NPROC)
 .PHONY: test
 test:
 	$(GOTEST) -short $(WHAT)
+
+.PHONY: run-setup
+run-setup:
+	kind get clusters | grep mkl || kind create cluster --name mkl
+	kind export kubeconfig --name mkl --kubeconfig mkl.kubeconfig
+	kubectl create configmap test-configmap --from-literal=hello=world -n default --dry-run=client -o yaml \
+		| kubectl --kubeconfig mkl.kubeconfig apply -f-
+
+.PHONY: run
+run: | run-setup
+	$(GO) run . -config run.yaml -diagram run.mermaid -kubeconfig mkl.kubeconfig -debug

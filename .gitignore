@@ -1,4 +1,4 @@
 /.testbin
-/integration.kubeconfig.yaml
+/*.kubeconfig
 /kubeconfig.yaml
 /bin
