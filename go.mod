@@ -24,7 +24,7 @@ require (
 	k8s.io/klog/v2 v2.130.1
 	k8s.io/utils v0.0.0-20251002143259-bc988d571ff4
 	sigs.k8s.io/controller-runtime v0.23.1
-	sigs.k8s.io/multicluster-runtime v0.23.2-0.20260218084539-1df3cffe603b
+	sigs.k8s.io/multicluster-runtime v0.23.2-0.20260223093535-de2f380bea17
 	sigs.k8s.io/multicluster-runtime/providers/file v0.0.0-00010101000000-000000000000
 	sigs.k8s.io/yaml v1.6.0
 )
