@@ -356,8 +356,8 @@ github.com/nishanths/exhaustive v0.12.0 h1:vIY9sALmw6T/yxiASewa4TQcFsVYZQQRUQJhK
 github.com/nishanths/exhaustive v0.12.0/go.mod h1:mEZ95wPIZW+x8kC4TgC+9YCUgiST7ecevsVDTgc2obs=
 github.com/nishanths/predeclared v0.2.2 h1:V2EPdZPliZymNAn79T8RkNApBjMmVKh5XRpLm/w98Vk=
 github.com/nishanths/predeclared v0.2.2/go.mod h1:RROzoN6TnGQupbC+lqggsOlcgysk3LMK/HI84Mp280c=
-github.com/ntnn/mcutils v0.0.0-20260221160822-e249fa51cce9 h1:Rvp+iriPul5FDx8Wd4P8pvZvmNk830ujX3gQ96Az7Qk=
-github.com/ntnn/mcutils v0.0.0-20260221160822-e249fa51cce9/go.mod h1:x+Yg68seCij2RqPI2aGBPEoyEch4J7GARNN7+XE92js=
+github.com/ntnn/mcutils v0.0.0-20260223183638-d140ecdf23be h1:3e0b2t14g0Ms87Jz55pKeMD81Mr1k9Ne/lb1ZTarLvo=
+github.com/ntnn/mcutils v0.0.0-20260223183638-d140ecdf23be/go.mod h1:x+Yg68seCij2RqPI2aGBPEoyEch4J7GARNN7+XE92js=
 github.com/ntnn/multicluster-runtime v0.23.2-0.20260220200924-cd378f0a4fa1 h1:XAmAHFVPjjtIVDPN0jQY6x0TGemieS92QQX7EsT24uw=
 github.com/ntnn/multicluster-runtime v0.23.2-0.20260220200924-cd378f0a4fa1/go.mod h1:ri1Gvx7Qehy5nis6OnTgSpJIWaf2SuorHDwF/jvbWvM=
 github.com/ntnn/multicluster-runtime/providers/file v0.23.2-0.20260220204151-41a0911228f5 h1:zTy/gtKRl0w7e8LGCPX5PsC1zmLfPpKqKTKaCtxhMWY=
