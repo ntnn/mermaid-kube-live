@@ -17,7 +17,7 @@ require (
 	github.com/fsnotify/fsnotify v1.9.0
 	github.com/go-logr/logr v1.4.3
 	github.com/google/cel-go v0.27.0
-	github.com/ntnn/mcutils v0.0.0-20260223183638-d140ecdf23be
+	github.com/ntnn/mcutils v0.0.0-20260305204547-a9a605682e08
 	github.com/stretchr/testify v1.11.1
 	k8s.io/apimachinery v0.35.2
 	k8s.io/client-go v0.35.2
