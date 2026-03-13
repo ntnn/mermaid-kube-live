@@ -9,7 +9,7 @@ tool (
 )
 
 replace (
-	sigs.k8s.io/multicluster-runtime => github.com/ntnn/multicluster-runtime v0.23.2-0.20260220200924-cd378f0a4fa1
+	sigs.k8s.io/multicluster-runtime => github.com/ntnn/multicluster-runtime 5a71e2a8172e
 	sigs.k8s.io/multicluster-runtime/providers/file => github.com/ntnn/multicluster-runtime/providers/file v0.23.2-0.20260220204151-41a0911228f5
 )
 
