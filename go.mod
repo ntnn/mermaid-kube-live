@@ -8,11 +8,6 @@ tool (
 	k8s.io/code-generator/cmd/validation-gen
 )
 
-replace (
-	sigs.k8s.io/multicluster-runtime => github.com/ntnn/multicluster-runtime v0.23.2-0.20260220200924-cd378f0a4fa1
-	sigs.k8s.io/multicluster-runtime/providers/file => github.com/ntnn/multicluster-runtime/providers/file v0.23.2-0.20260220204151-41a0911228f5
-)
-
 require (
 	github.com/fsnotify/fsnotify v1.9.0
 	github.com/go-logr/logr v1.4.3
@@ -25,7 +20,7 @@ require (
 	k8s.io/utils v0.0.0-20260319190234-28399d86e0b5
 	sigs.k8s.io/controller-runtime v0.23.3
 	sigs.k8s.io/multicluster-runtime v0.23.2-0.20260326100618-c2fb00e0f56d
-	sigs.k8s.io/multicluster-runtime/providers/file v0.0.0-00010101000000-000000000000
+	sigs.k8s.io/multicluster-runtime/providers/file v0.23.2-0.20260326100618-c2fb00e0f56d
 	sigs.k8s.io/yaml v1.6.0
 )
 
