@@ -356,8 +356,8 @@ github.com/nishanths/exhaustive v0.12.0 h1:vIY9sALmw6T/yxiASewa4TQcFsVYZQQRUQJhK
 github.com/nishanths/exhaustive v0.12.0/go.mod h1:mEZ95wPIZW+x8kC4TgC+9YCUgiST7ecevsVDTgc2obs=
 github.com/nishanths/predeclared v0.2.2 h1:V2EPdZPliZymNAn79T8RkNApBjMmVKh5XRpLm/w98Vk=
 github.com/nishanths/predeclared v0.2.2/go.mod h1:RROzoN6TnGQupbC+lqggsOlcgysk3LMK/HI84Mp280c=
-github.com/ntnn/mcutils v0.0.0-20260319135407-9a8a2e816dc7 h1:MaImPXYNSznDLXJDTy10q1gzdV9ubqZtdZ3+j5o5Kmo=
-github.com/ntnn/mcutils v0.0.0-20260319135407-9a8a2e816dc7/go.mod h1:LoErmpF1nZe78C+3NolxaZOM5fEGTmco4bIvJgDHLEA=
+github.com/ntnn/mcutils v0.0.0-20260328010225-ef611aee013b h1:DJIUqmykMVRpPpOtPrxpjtcCuQHNCerj2A3BOwox6AM=
+github.com/ntnn/mcutils v0.0.0-20260328010225-ef611aee013b/go.mod h1:TnTo4JBGLT3Yi/6GDfjrEuP8pQq760ghshdtYoisEFA=
 github.com/nunnatsa/ginkgolinter v0.22.0 h1:o9g7JN6efdBxAHhejvPkodEjWsOBze9zDnPePsvC/Qg=
 github.com/nunnatsa/ginkgolinter v0.22.0/go.mod h1:zIFAk36fhcHQIiYOGXLbrGTXz7cvpufhRYem6ToCVnY=
 github.com/onsi/ginkgo/v2 v2.27.2 h1:LzwLj0b89qtIy6SSASkzlNvX6WktqurSHwkk2ipF/Ns=
