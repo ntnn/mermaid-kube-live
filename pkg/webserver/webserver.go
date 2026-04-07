@@ -65,7 +65,8 @@ func (s *WebServer) Start(ctx context.Context, addr string) error {
 		}
 	}()
 
-	go func() {
+	// ctx is already cancelled at this point, so a fresh context is needed for the shutdown timeout.
+	go func() { //nolint:gosec // G118 - intentional: parent ctx is done
 		<-ctx.Done()
 		s.Logger.Info("shutting down web server")
 
