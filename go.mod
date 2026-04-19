@@ -46,7 +46,7 @@ require (
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.3-0.20250322232337-35a7c28c31ee // indirect
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
-	github.com/ntnn/mindl v0.0.0-20260406120906-f33b3e0ab202 // indirect
+	github.com/ntnn/mindl v0.1.0 // indirect
 	github.com/onsi/ginkgo/v2 v2.28.1 // indirect
 	github.com/onsi/gomega v1.39.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
