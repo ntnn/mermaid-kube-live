@@ -78,8 +78,8 @@ github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 h1:C3w9PqII01/Oq
 github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822/go.mod h1:+n7T8mK8HuQTcFwEeznm/DIxMOiR9yIdICNftLE1DvQ=
 github.com/ntnn/mcutils v0.0.0-20260401092719-d32e8c1c2d84 h1:lSt6rPCLtTL2mB31sxMJeJkr7RXbNSp/raJMzLoyqI8=
 github.com/ntnn/mcutils v0.0.0-20260401092719-d32e8c1c2d84/go.mod h1:IE1FkMpUPPE/9GlPvSTsYyOiameAArykpIWwhOqt6bg=
-github.com/ntnn/mindl v0.0.0-20260406120906-f33b3e0ab202 h1:IoiSMOUma/TGKcItwJAmX+6anuOf/h7+KuOXOIc2Mtg=
-github.com/ntnn/mindl v0.0.0-20260406120906-f33b3e0ab202/go.mod h1:fiva9uxPeEte6Wo5SR0iTaNiUrtphILf5ckDgHRhLdw=
+github.com/ntnn/mindl v0.1.0 h1:1Hwl6FPHdHHTMONNv3Px2pG6hE30uKDhIcgUAolYj94=
+github.com/ntnn/mindl v0.1.0/go.mod h1:fiva9uxPeEte6Wo5SR0iTaNiUrtphILf5ckDgHRhLdw=
 github.com/onsi/ginkgo/v2 v2.28.1 h1:S4hj+HbZp40fNKuLUQOYLDgZLwNUVn19N3Atb98NCyI=
 github.com/onsi/ginkgo/v2 v2.28.1/go.mod h1:CLtbVInNckU3/+gC8LzkGUb9oF+e8W8TdUsxPwvdOgE=
 github.com/onsi/gomega v1.39.1 h1:1IJLAad4zjPn2PsnhH70V4DKRFlrCzGBNrNaru+Vf28=
