@@ -1,7 +1,7 @@
 # yaml-language-server: $schema=https://ocm.software/latest/schemas/bindings/go/constructor/schema-2020-12.json
 components:
 - name: github.com/ntnn/mermaid-kube-live
-  version: 0.0.1-rc1
+  version: 0.0.1-rc2
   provider:
     name: Nelo-T. Wallus
   resources:

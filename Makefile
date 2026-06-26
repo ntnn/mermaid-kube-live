@@ -32,9 +32,14 @@ build: bin
 .PHONY: ocm
 ocm: build
 	$(OCM) add cv
-	$(OCM) transfer cv \
-		./transport-archive//github.com/ntnn/mermaid-kube-live \
-		ghcr.io/ntnn/mermaid-kube-live
+	$(OCM) get cv --output json ./transport-archive// \
+		| yq '.[] | .component.name + ":" + .component.version' \
+		| while read descriptor; do \
+			$(OCM) transfer cv --recursive \
+				./transport-archive//$$descriptor \
+				ghcr.io/ntnn/mermaid-kube-live; \
+	done
+
 
 .PHONY: fmt
 fmt:
