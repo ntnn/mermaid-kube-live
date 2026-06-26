@@ -1,4 +1,5 @@
 GO ?= go
+OCM ?= ocm
 
 TOOLS_DIR := hack/tools
 GOLANGCI_LINT_VER := 2.12.2
@@ -27,6 +28,13 @@ codegen:
 .PHONY: build
 build: bin
 	$(GO) build -o bin/mermaid-kube-live .
+
+.PHONY: ocm
+ocm: build
+	$(OCM) add cv
+	$(OCM) transfer cv \
+		./transport-archive//github.com/ntnn/mermaid-kube-live \
+		ghcr.io/ntnn/mermaid-kube-live
 
 .PHONY: fmt
 fmt:

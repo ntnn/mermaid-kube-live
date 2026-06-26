@@ -3,3 +3,4 @@
 /kubeconfig.yaml
 /bin
 /hack/tools
+/transport-archive
