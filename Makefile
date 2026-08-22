@@ -2,7 +2,7 @@ GO ?= go
 OCM ?= ocm
 
 TOOLS_DIR := hack/tools
-GOLANGCI_LINT_VER := 2.12.2
+GOLANGCI_LINT_VER := 2.13.1
 GOLANGCI_LINT := $(TOOLS_DIR)/golangci-lint-$(GOLANGCI_LINT_VER)
 
 DEEPCOPY_GEN := $(GO) tool deepcopy-gen
